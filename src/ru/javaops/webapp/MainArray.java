@@ -43,7 +43,7 @@ public class MainArray {
                     break;
                 case "update":
                     r = ARRAY_STORAGE.get(uuid);
-                    ARRAY_STORAGE.update(r, "newuuid");
+                    ARRAY_STORAGE.update(r);
                     printAll();
                     break;
                 case "delete":
