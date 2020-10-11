@@ -31,29 +31,29 @@ public class ArrayStorage {
     }
 
     public void update(Resume resume) {
-        int i = searchIndex(resume.getUuid());
-        if (i == -1) {
+        int index = searchIndex(resume.getUuid());
+        if (index == -1) {
             System.out.println("ERROR: There is no resume with uuid " + resume.getUuid() + " in the storage.");
         } else {
-            storage[i] = resume;
+            storage[index] = resume;
         }
     }
 
     public Resume get(String uuid) {
-        int i = searchIndex(uuid);
-        if (i == -1) {
+        int index = searchIndex(uuid);
+        if (index == -1) {
             System.out.println("ERROR: There is no resume with uuid " + uuid + " in the storage.");
             return null;
         }
-        return storage[i];
+        return storage[index];
     }
 
     public void delete(String uuid) {
-        int i = searchIndex(uuid);
-        if (i == -1) {
+        int index = searchIndex(uuid);
+        if (index == -1) {
             System.out.println("ERROR: There is no resume with uuid " + uuid + " in the storage.");
         } else {
-            System.arraycopy(storage, i + 1, storage, i, storageSize - i - 1);
+            System.arraycopy(storage, index + 1, storage, index, storageSize - index - 1);
             storageSize--;
         }
     }
