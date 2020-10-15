@@ -9,19 +9,12 @@ public class SortedArrayStorage extends AbstractArrayStorage {
     @Override
     public void save(Resume resume) {
         int index = getIndex(resume.getUuid());
-        if (storageSize == STORAGE_LIMIT) {
-            System.out.println("ERROR: The array size would be exceeded.");
-            return;
-        }
-        if (index >= 0) {
-            System.out.println("ERROR: Resume with uuid " + resume.getUuid() + " already exists.");
-        } else {
+        if (isRoomy() && !isExists(index)) {
             index = -index - 1;
             System.arraycopy(storage, index, storage, index + 1, storageSize - index);
             storage[index] = resume;
             storageSize++;
         }
-
     }
 
     @Override

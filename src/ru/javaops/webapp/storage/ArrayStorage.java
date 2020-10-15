@@ -5,13 +5,7 @@ import ru.javaops.webapp.model.Resume;
 public class ArrayStorage extends AbstractArrayStorage {
 
     public void save(Resume resume) {
-        if (storageSize == STORAGE_LIMIT) {
-            System.out.println("ERROR: The array size would be exceeded.");
-            return;
-        }
-        if (getIndex(resume.getUuid()) != -1) {
-            System.out.println("ERROR: Resume with uuid " + resume.getUuid() + " already exists.");
-        } else {
+        if (isRoomy() && !isExists(getIndex(resume.getUuid()))) {
             storage[storageSize] = resume;
             storageSize++;
         }

@@ -54,8 +54,26 @@ public abstract class AbstractArrayStorage implements Storage {
      * @return array, contains only Resumes in storage (without null)
      */
     public Resume[] getAll() {
-        return Arrays.copyOfRange(storage, 0, storageSize);
+        return Arrays.copyOf(storage, storageSize);
     }
 
     protected abstract int getIndex(String uuid);
+
+    protected boolean isRoomy() {
+        if (storageSize == STORAGE_LIMIT) {
+            System.out.println("ERROR: The array size would be exceeded.");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    protected boolean isExists(int index) {
+        if (index >= 0) {
+            System.out.println("ERROR: Resume with uuid " + storage[index].getUuid() + " already exists.");
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
