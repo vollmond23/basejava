@@ -12,14 +12,33 @@ public abstract class AbstractArrayStorage implements Storage {
 
     protected Resume[] storage = new Resume[STORAGE_LIMIT];
     protected int storageSize = 0;
+    protected int index;
 
     public void clear() {
         Arrays.fill(storage, 0, storageSize, null);
         storageSize = 0;
     }
 
+    public void save(Resume resume) {
+        if (resume.getUuid() == null) {
+            System.out.println("ERROR: Uuid cannot be null.");
+            return;
+        }
+        if (storageSize == STORAGE_LIMIT) {
+            System.out.println("ERROR: The array size would be exceeded.");
+            return;
+        }
+        index = getIndex(resume.getUuid());
+        if (index >= 0) {
+            System.out.println("ERROR: Resume with uuid " + resume.getUuid() + " already exists.");
+        } else {
+            addResume(resume);
+            storageSize++;
+        }
+    }
+
     public void update(Resume resume) {
-        int index = getIndex(resume.getUuid());
+        index = getIndex(resume.getUuid());
         if (index < 0) {
             System.out.println("ERROR: There is no resume with uuid " + resume.getUuid() + " in the storage.");
         } else {
@@ -28,17 +47,21 @@ public abstract class AbstractArrayStorage implements Storage {
     }
 
     public void delete(String uuid) {
-        int index = getIndex(uuid);
+        if (uuid == null) {
+            System.out.println("ERROR: Uuid cannot be null.");
+            return;
+        }
+        index = getIndex(uuid);
         if (index < 0) {
             System.out.println("ERROR: There is no resume with uuid " + uuid + " in the storage.");
         } else {
-            System.arraycopy(storage, index + 1, storage, index, storageSize - index - 1);
+            delResume(index);
             storageSize--;
         }
     }
 
     public Resume get(String uuid) {
-        int index = getIndex(uuid);
+        index = getIndex(uuid);
         if (index < 0) {
             System.out.println("ERROR: There is no resume with uuid " + uuid + " in the storage.");
             return null;
@@ -59,21 +82,7 @@ public abstract class AbstractArrayStorage implements Storage {
 
     protected abstract int getIndex(String uuid);
 
-    protected boolean isRoomy() {
-        if (storageSize == STORAGE_LIMIT) {
-            System.out.println("ERROR: The array size would be exceeded.");
-            return false;
-        } else {
-            return true;
-        }
-    }
+    protected abstract void addResume(Resume resume);
 
-    protected boolean isExists(int index) {
-        if (index >= 0) {
-            System.out.println("ERROR: Resume with uuid " + storage[index].getUuid() + " already exists.");
-            return true;
-        } else {
-            return false;
-        }
-    }
+    protected abstract void delResume(int index);
 }
