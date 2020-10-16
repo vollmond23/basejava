@@ -20,10 +20,7 @@ public abstract class AbstractArrayStorage implements Storage {
     }
 
     public void save(Resume resume) {
-        if (resume.getUuid() == null) {
-            System.out.println("ERROR: Uuid cannot be null.");
-            return;
-        }
+        if (isNull(resume.getUuid())) return;
         if (storageSize == STORAGE_LIMIT) {
             System.out.println("ERROR: The array size would be exceeded.");
             return;
@@ -47,10 +44,7 @@ public abstract class AbstractArrayStorage implements Storage {
     }
 
     public void delete(String uuid) {
-        if (uuid == null) {
-            System.out.println("ERROR: Uuid cannot be null.");
-            return;
-        }
+        if (isNull(uuid)) return;
         index = getIndex(uuid);
         if (index < 0) {
             System.out.println("ERROR: There is no resume with uuid " + uuid + " in the storage.");
@@ -78,6 +72,14 @@ public abstract class AbstractArrayStorage implements Storage {
      */
     public Resume[] getAll() {
         return Arrays.copyOf(storage, storageSize);
+    }
+
+    private boolean isNull(String uuid) {
+        if (uuid == null) {
+            System.out.println("ERROR: Uuid cannot be null.");
+            return true;
+        }
+        return false;
     }
 
     protected abstract int getIndex(String uuid);
