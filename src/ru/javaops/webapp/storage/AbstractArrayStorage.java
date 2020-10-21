@@ -1,5 +1,8 @@
 package ru.javaops.webapp.storage;
 
+import ru.javaops.webapp.exception.ExistStorageException;
+import ru.javaops.webapp.exception.NotExistStorageException;
+import ru.javaops.webapp.exception.StorageException;
 import ru.javaops.webapp.model.Resume;
 
 import java.util.Arrays;
@@ -20,14 +23,12 @@ public abstract class AbstractArrayStorage implements Storage {
     }
 
     public void save(Resume resume) {
-        if (isNull(resume.getUuid())) return;
         if (storageSize == STORAGE_LIMIT) {
-            System.out.println("ERROR: The array size would be exceeded.");
-            return;
+            throw new StorageException("ERROR: The array size would be exceeded.", resume.getUuid());
         }
         index = getIndex(resume.getUuid());
         if (index >= 0) {
-            System.out.println("ERROR: Resume with uuid " + resume.getUuid() + " already exists.");
+            throw new ExistStorageException(resume.getUuid());
         } else {
             addResume(resume);
             storageSize++;
@@ -37,19 +38,19 @@ public abstract class AbstractArrayStorage implements Storage {
     public void update(Resume resume) {
         index = getIndex(resume.getUuid());
         if (index < 0) {
-            System.out.println("ERROR: There is no resume with uuid " + resume.getUuid() + " in the storage.");
+            throw new NotExistStorageException(resume.getUuid());
         } else {
             storage[index] = resume;
         }
     }
 
     public void delete(String uuid) {
-        if (isNull(uuid)) return;
         index = getIndex(uuid);
         if (index < 0) {
-            System.out.println("ERROR: There is no resume with uuid " + uuid + " in the storage.");
+            throw new NotExistStorageException(uuid);
         } else {
             delResume(index);
+            storage[storageSize - 1] = null;
             storageSize--;
         }
     }
@@ -57,8 +58,7 @@ public abstract class AbstractArrayStorage implements Storage {
     public Resume get(String uuid) {
         index = getIndex(uuid);
         if (index < 0) {
-            System.out.println("ERROR: There is no resume with uuid " + uuid + " in the storage.");
-            return null;
+            throw new NotExistStorageException(uuid);
         }
         return storage[index];
     }
@@ -72,14 +72,6 @@ public abstract class AbstractArrayStorage implements Storage {
      */
     public Resume[] getAll() {
         return Arrays.copyOf(storage, storageSize);
-    }
-
-    private boolean isNull(String uuid) {
-        if (uuid == null) {
-            System.out.println("ERROR: Uuid cannot be null.");
-            return true;
-        }
-        return false;
     }
 
     protected abstract int getIndex(String uuid);
