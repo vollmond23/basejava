@@ -5,12 +5,12 @@ import ru.javaops.webapp.model.Resume;
 public class ArrayStorage extends AbstractArrayStorage {
 
     @Override
-    protected void addResume(Resume resume) {
+    protected void insertElement(Resume resume, int index) {
         storage[storageSize] = resume;
     }
 
     @Override
-    protected void delResume(int index) {
+    protected void fillDeletedElement(int index) {
         storage[index] = storage[storageSize - 1];
     }
 
