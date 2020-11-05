@@ -22,13 +22,14 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     public void save(Resume resume) {
         if (storageSize == STORAGE_LIMIT) {
             throw new StorageException("ERROR: The array size would be exceeded.", resume.getUuid());
+        } else {
+            super.save(resume);
         }
-        checkAndSave(resume);
         storageSize++;
     }
 
     public void delete(String uuid) {
-        checkAndDelete(uuid);
+        super.delete(uuid);
         storage[storageSize - 1] = null;
         storageSize--;
     }

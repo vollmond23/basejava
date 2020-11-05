@@ -15,16 +15,6 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    public void save(Resume resume) {
-        checkAndSave(resume);
-    }
-
-    @Override
-    public void delete(String uuid) {
-        checkAndDelete(uuid);
-    }
-
-    @Override
     public Resume[] getAll() {
         Resume[] resumes = new Resume[storage.size()];
         storage.toArray(resumes);
