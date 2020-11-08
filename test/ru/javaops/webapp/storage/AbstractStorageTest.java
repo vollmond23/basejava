@@ -6,8 +6,7 @@ import ru.javaops.webapp.exception.ExistStorageException;
 import ru.javaops.webapp.exception.NotExistStorageException;
 import ru.javaops.webapp.model.Resume;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 public abstract class AbstractStorageTest {
     protected Storage storage;
@@ -92,11 +91,10 @@ public abstract class AbstractStorageTest {
 
     @Test
     public void getAll() {
+        Resume[] actualResumes = {RESUME_1, RESUME_2, RESUME_3};
         Resume[] expectedResumes = storage.getAll();
         assertEquals(3, expectedResumes.length);
-        assertEquals(RESUME_1, expectedResumes[0]);
-        assertEquals(RESUME_2, expectedResumes[1]);
-        assertEquals(RESUME_3, expectedResumes[2]);
+        assertArrayEquals(actualResumes, expectedResumes);
     }
 
     @Test

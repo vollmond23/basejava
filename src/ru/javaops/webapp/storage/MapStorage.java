@@ -12,21 +12,21 @@ public class MapStorage extends AbstractStorage {
     private Map<String, Resume> storage = new LinkedHashMap<>();
 
     @Override
-    protected int getIndex(String uuid) {
-        int index = 0;
+    protected int getKey(String uuid) {
+        int searchKey = 0;
         for (String keyUuid : storage.keySet()) {
             if (keyUuid.equals(uuid)) {
-                return index;
+                return searchKey;
             }
-            index++;
+            searchKey++;
         }
         return -1;
     }
 
-    private String getUuid(int index) {
+    private String getUuid(int searchKey) {
         int i = 0;
         for (Map.Entry<String, Resume> entry : storage.entrySet()) {
-            if (i == index) {
+            if (i == searchKey) {
                 return entry.getKey();
             }
             i++;
@@ -35,23 +35,23 @@ public class MapStorage extends AbstractStorage {
     }
 
     @Override
-    protected void insertElement(Resume resume, int index) {
+    protected void insertElement(Resume resume, int searchKey) {
         storage.put(resume.getUuid(), resume);
     }
 
     @Override
-    protected void fillDeletedElement(int index) {
-        storage.remove(getUuid(index));
+    protected void fillDeletedElement(int searchKey) {
+        storage.remove(getUuid(searchKey));
     }
 
     @Override
-    protected void updateElement(int index, Resume resume) {
+    protected void updateElement(int searchKey, Resume resume) {
         storage.put(resume.getUuid(), resume);
     }
 
     @Override
-    protected Resume getElement(int index) {
-        return storage.get(getUuid(index));
+    protected Resume getElement(int searchKey) {
+        return storage.get(getUuid(searchKey));
     }
 
     @Override
