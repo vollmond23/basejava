@@ -23,6 +23,17 @@ public class MapStorage extends AbstractStorage {
         return -1;
     }
 
+    private String getUuid(int index) {
+        int i = 0;
+        for (Map.Entry<String, Resume> entry : storage.entrySet()) {
+            if (i == index) {
+                return entry.getKey();
+            }
+            i++;
+        }
+        return null;
+    }
+
     @Override
     protected void insertElement(Resume resume, int index) {
         storage.put(resume.getUuid(), resume);
@@ -30,14 +41,7 @@ public class MapStorage extends AbstractStorage {
 
     @Override
     protected void fillDeletedElement(int index) {
-        int i = 0;
-        for (Map.Entry<String, Resume> entry : storage.entrySet()) {
-            if (i == index) {
-                storage.remove(entry.getKey());
-                break;
-            }
-            i++;
-        }
+        storage.remove(getUuid(index));
     }
 
     @Override
@@ -47,14 +51,7 @@ public class MapStorage extends AbstractStorage {
 
     @Override
     protected Resume getElement(int index) {
-        int i = 0;
-        for (Map.Entry<String, Resume> entry : storage.entrySet()) {
-            if (i == index) {
-                return storage.get(entry.getKey());
-            }
-            i++;
-        }
-        return null;
+        return storage.get(getUuid(index));
     }
 
     @Override
