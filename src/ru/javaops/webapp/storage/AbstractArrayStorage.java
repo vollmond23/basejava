@@ -28,8 +28,8 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
         storageSize++;
     }
 
-    public void delete(String uuid) {
-        super.delete(uuid);
+    public void delete(Resume resume) {
+        super.delete(resume);
         storage[storageSize - 1] = null;
         storageSize--;
     }
@@ -46,12 +46,17 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     }
 
     @Override
-    protected void updateElement(int index, Resume resume) {
+    protected void updateElement(Resume resume, int index) {
         storage[index] = resume;
     }
 
     @Override
-    protected Resume getElement(int index) {
-        return storage[index];
+    protected Resume getElement(String uuid) {
+        for (Resume resume : storage) {
+            if (resume.getUuid().equals(uuid)) {
+                return resume;
+            }
+        }
+        return null;
     }
 }

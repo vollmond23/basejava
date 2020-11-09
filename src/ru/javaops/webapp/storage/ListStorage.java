@@ -37,17 +37,22 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    protected void fillDeletedElement(int index) {
+    protected void fillDeletedElement(Resume resume, int index) {
         storage.remove(index);
     }
 
     @Override
-    protected void updateElement(int index, Resume resume) {
+    protected void updateElement(Resume resume, int index) {
         storage.set(index, resume);
     }
 
     @Override
-    protected Resume getElement(int index) {
-        return storage.get(index);
+    protected Resume getElement(String uuid) {
+        for (Resume resume : storage) {
+            if (resume.getUuid().equals(uuid)) {
+                return resume;
+            }
+        }
+        return null;
     }
 }

@@ -13,25 +13,7 @@ public class MapStorage extends AbstractStorage {
 
     @Override
     protected int getKey(String uuid) {
-        int searchKey = 0;
-        for (String keyUuid : storage.keySet()) {
-            if (keyUuid.equals(uuid)) {
-                return searchKey;
-            }
-            searchKey++;
-        }
-        return -1;
-    }
-
-    private String getUuid(int searchKey) {
-        int i = 0;
-        for (Map.Entry<String, Resume> entry : storage.entrySet()) {
-            if (i == searchKey) {
-                return entry.getKey();
-            }
-            i++;
-        }
-        return null;
+        return storage.containsKey(uuid) ? 0 : -1;
     }
 
     @Override
@@ -40,18 +22,18 @@ public class MapStorage extends AbstractStorage {
     }
 
     @Override
-    protected void fillDeletedElement(int searchKey) {
-        storage.remove(getUuid(searchKey));
+    protected void fillDeletedElement(Resume resume, int searchKey) {
+        storage.remove(resume.getUuid());
     }
 
     @Override
-    protected void updateElement(int searchKey, Resume resume) {
+    protected void updateElement(Resume resume, int searchKey) {
         storage.put(resume.getUuid(), resume);
     }
 
     @Override
-    protected Resume getElement(int searchKey) {
-        return storage.get(getUuid(searchKey));
+    protected Resume getElement(String uuid) {
+        return storage.get(uuid);
     }
 
     @Override

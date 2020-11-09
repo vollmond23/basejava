@@ -7,9 +7,9 @@ import ru.javaops.webapp.model.Resume;
 public abstract class AbstractStorage implements Storage {
 
     @Override
-    public void delete(String uuid) {
-        int searchKey = checkExist(uuid);
-        fillDeletedElement(searchKey);
+    public void delete(Resume resume) {
+        int searchKey = checkExist(resume.getUuid());
+        fillDeletedElement(resume, searchKey);
     }
 
     @Override
@@ -21,13 +21,13 @@ public abstract class AbstractStorage implements Storage {
     @Override
     public void update(Resume resume) {
         int searchKey = checkExist(resume.getUuid());
-        updateElement(searchKey, resume);
+        updateElement(resume, searchKey);
     }
 
     @Override
     public Resume get(String uuid) {
-        int searchKey = checkExist(uuid);
-        return getElement(searchKey);
+        checkExist(uuid);
+        return getElement(uuid);
     }
 
     private int checkNotExist(String uuid) {
@@ -50,9 +50,9 @@ public abstract class AbstractStorage implements Storage {
 
     protected abstract void insertElement(Resume resume, int searchKey);
 
-    protected abstract void fillDeletedElement(int searchKey);
+    protected abstract void fillDeletedElement(Resume resume, int searchKey);
 
-    protected abstract void updateElement(int searchKey, Resume resume);
+    protected abstract void updateElement(Resume resume, int searchKey);
 
-    protected abstract Resume getElement(int searchKey);
+    protected abstract Resume getElement(String uuid);
 }
