@@ -5,19 +5,19 @@ import ru.javaops.webapp.model.Resume;
 public class ArrayStorage extends AbstractArrayStorage {
 
     @Override
-    protected void insertElement(Resume resume, int index) {
+    protected void insertElement(Resume resume) {
         storage[storageSize] = resume;
     }
 
     @Override
-    protected void fillDeletedElement(Resume resume, int index) {
-        storage[index] = storage[storageSize - 1];
+    protected void fillDeletedElement(Resume resume) {
+        storage[getIndex(resume)] = storage[storageSize - 1];
     }
 
     @Override
-    protected int getKey(String uuid) {
+    protected int getIndex(Resume resume) {
         for (int i = 0; i < storageSize; i++) {
-            if (storage[i].getUuid().equals(uuid)) {
+            if (storage[i].getUuid().equals(resume.getUuid())) {
                 return i;
             }
         }

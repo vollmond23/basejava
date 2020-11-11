@@ -8,20 +8,20 @@ public abstract class AbstractStorage implements Storage {
 
     @Override
     public void delete(Resume resume) {
-        int searchKey = checkExist(resume.getUuid());
-        fillDeletedElement(resume, searchKey);
+        checkExist(resume.getUuid());
+        fillDeletedElement(resume);
     }
 
     @Override
     public void save(Resume resume) {
-        int searchKey = checkNotExist(resume.getUuid());
-        insertElement(resume, searchKey);
+        checkNotExist(resume.getUuid());
+        insertElement(resume);
     }
 
     @Override
     public void update(Resume resume) {
-        int searchKey = checkExist(resume.getUuid());
-        updateElement(resume, searchKey);
+        checkExist(resume.getUuid());
+        updateElement(resume);
     }
 
     @Override
@@ -30,29 +30,23 @@ public abstract class AbstractStorage implements Storage {
         return getElement(uuid);
     }
 
-    private int checkNotExist(String uuid) {
-        int searchKey = getKey(uuid);
-        if (searchKey >= 0) {
+    private void checkNotExist(String uuid) {
+        if (getElement(uuid) != null) {
             throw new ExistStorageException(uuid);
         }
-        return searchKey;
     }
 
-    private int checkExist(String uuid) {
-        int searchKey = getKey(uuid);
-        if (searchKey < 0) {
+    private void checkExist(String uuid) {
+        if (getElement(uuid) == null) {
             throw new NotExistStorageException(uuid);
         }
-        return searchKey;
     }
 
-    protected abstract int getKey(String uuid);
+    protected abstract void insertElement(Resume resume);
 
-    protected abstract void insertElement(Resume resume, int searchKey);
+    protected abstract void fillDeletedElement(Resume resume);
 
-    protected abstract void fillDeletedElement(Resume resume, int searchKey);
-
-    protected abstract void updateElement(Resume resume, int searchKey);
+    protected abstract void updateElement(Resume resume);
 
     protected abstract Resume getElement(String uuid);
 }

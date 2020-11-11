@@ -12,22 +12,17 @@ public class MapStorage extends AbstractStorage {
     private Map<String, Resume> storage = new LinkedHashMap<>();
 
     @Override
-    protected int getKey(String uuid) {
-        return storage.containsKey(uuid) ? 0 : -1;
-    }
-
-    @Override
-    protected void insertElement(Resume resume, int searchKey) {
+    protected void insertElement(Resume resume) {
         storage.put(resume.getUuid(), resume);
     }
 
     @Override
-    protected void fillDeletedElement(Resume resume, int searchKey) {
+    protected void fillDeletedElement(Resume resume) {
         storage.remove(resume.getUuid());
     }
 
     @Override
-    protected void updateElement(Resume resume, int searchKey) {
+    protected void updateElement(Resume resume) {
         storage.put(resume.getUuid(), resume);
     }
 

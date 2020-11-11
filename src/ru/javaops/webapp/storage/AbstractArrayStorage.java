@@ -46,17 +46,20 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     }
 
     @Override
-    protected void updateElement(Resume resume, int index) {
+    protected void updateElement(Resume resume) {
+        int index = getIndex(resume);
         storage[index] = resume;
     }
 
     @Override
     protected Resume getElement(String uuid) {
-        for (Resume resume : storage) {
-            if (resume.getUuid().equals(uuid)) {
-                return resume;
+        for (int i = 0; i < storageSize; i++) {
+            if (storage[i].getUuid().equals(uuid)) {
+                return storage[i];
             }
         }
         return null;
     }
+
+    protected abstract int getIndex(Resume resume);
 }
