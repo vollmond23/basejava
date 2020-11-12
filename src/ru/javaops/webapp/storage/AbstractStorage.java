@@ -8,45 +8,51 @@ public abstract class AbstractStorage implements Storage {
 
     @Override
     public void delete(Resume resume) {
-        checkExist(resume.getUuid());
-        fillDeletedElement(resume);
+        int searchKey = checkExist(resume);
+        deleteElement(resume, searchKey);
     }
 
     @Override
     public void save(Resume resume) {
-        checkNotExist(resume.getUuid());
-        insertElement(resume);
+        int searchKey = checkNotExist(resume);
+        saveElement(resume, searchKey);
     }
 
     @Override
     public void update(Resume resume) {
-        checkExist(resume.getUuid());
-        updateElement(resume);
+        int searchKey = checkExist(resume);
+        updateElement(resume, searchKey);
     }
 
     @Override
     public Resume get(String uuid) {
-        checkExist(uuid);
-        return getElement(uuid);
+        int searchKey = checkExist(new Resume(uuid));
+        return getElement(searchKey, uuid);
     }
 
-    private void checkNotExist(String uuid) {
-        if (getElement(uuid) != null) {
-            throw new ExistStorageException(uuid);
+    private int checkNotExist(Resume resume) {
+        int searchKey = getIndex(resume);
+        if (searchKey >= 0) {
+            throw new ExistStorageException(resume.getUuid());
         }
+        return searchKey;
     }
 
-    private void checkExist(String uuid) {
-        if (getElement(uuid) == null) {
-            throw new NotExistStorageException(uuid);
+    private int checkExist(Resume resume) {
+        int searchKey = getIndex(resume);
+        if (searchKey < 0) {
+            throw new NotExistStorageException(resume.getUuid());
         }
+        return searchKey;
     }
 
-    protected abstract void insertElement(Resume resume);
+    protected abstract int getIndex(Resume resume);
 
-    protected abstract void fillDeletedElement(Resume resume);
+    protected abstract void saveElement(Resume resume, int searchKey);
 
-    protected abstract void updateElement(Resume resume);
+    protected abstract void deleteElement(Resume resume, int searchKey);
 
-    protected abstract Resume getElement(String uuid);
+    protected abstract void updateElement(Resume resume, int searchKey);
+
+    protected abstract Resume getElement(int searchKey, String uuid);
 }

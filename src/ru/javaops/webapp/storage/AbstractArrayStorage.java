@@ -19,17 +19,17 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
         storageSize = 0;
     }
 
-    public void save(Resume resume) {
+    public void saveElement(Resume resume, int searchKey) {
         if (storageSize == STORAGE_LIMIT) {
             throw new StorageException("ERROR: The array size would be exceeded.", resume.getUuid());
         } else {
-            super.save(resume);
+            insertElement(resume, searchKey);
         }
         storageSize++;
     }
 
-    public void delete(Resume resume) {
-        super.delete(resume);
+    public void deleteElement(Resume resume, int searchKey) {
+        fillDeletedElement(searchKey);
         storage[storageSize - 1] = null;
         storageSize--;
     }
@@ -46,20 +46,16 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     }
 
     @Override
-    protected void updateElement(Resume resume) {
-        int index = getIndex(resume);
-        storage[index] = resume;
+    protected void updateElement(Resume resume, int searchKey) {
+        storage[searchKey] = resume;
     }
 
     @Override
-    protected Resume getElement(String uuid) {
-        for (int i = 0; i < storageSize; i++) {
-            if (storage[i].getUuid().equals(uuid)) {
-                return storage[i];
-            }
-        }
-        return null;
+    protected Resume getElement(int searchKey, String uuid) {
+        return storage[searchKey];
     }
 
-    protected abstract int getIndex(Resume resume);
+    protected abstract void fillDeletedElement(int index);
+
+    protected abstract void insertElement(Resume resume, int index);
 }

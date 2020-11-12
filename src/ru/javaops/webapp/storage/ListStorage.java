@@ -27,28 +27,27 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    protected void insertElement(Resume resume) {
+    protected int getIndex(Resume resume) {
+        return storage.indexOf(resume);
+    }
+
+    @Override
+    protected void saveElement(Resume resume, int searchKey) {
         storage.add(resume);
     }
 
     @Override
-    protected void fillDeletedElement(Resume resume) {
-        storage.remove(resume);
+    protected void deleteElement(Resume resume, int searchKey) {
+        storage.remove(searchKey);
     }
 
     @Override
-    protected void updateElement(Resume resume) {
-        int index = storage.indexOf(new Resume(resume.getUuid()));
-        storage.set(index, resume);
+    protected void updateElement(Resume resume, int searchKey) {
+        storage.set(searchKey, resume);
     }
 
     @Override
-    protected Resume getElement(String uuid) {
-        for (Resume resume : storage) {
-            if (resume.getUuid().equals(uuid)) {
-                return resume;
-            }
-        }
-        return null;
+    protected Resume getElement(int index, String uuid) {
+        return storage.get(index);
     }
 }
