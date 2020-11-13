@@ -2,9 +2,7 @@ package ru.javaops.webapp.storage;
 
 import ru.javaops.webapp.model.Resume;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MapStorage extends AbstractStorage {
@@ -22,8 +20,8 @@ public class MapStorage extends AbstractStorage {
     }
 
     @Override
-    protected int getIndex(Resume resume) {
-        return storage.containsValue(resume) ? 0 : -1;
+    protected int getSearchKey(String uuid) {
+        return storage.containsValue(new Resume(uuid)) ? 0 : -1;
     }
 
     @Override
@@ -44,9 +42,7 @@ public class MapStorage extends AbstractStorage {
     @Override
     public Resume[] getAll() {
         Resume[] resumes = new Resume[storage.size()];
-        List<Resume> resumeList = new ArrayList<>(storage.values());
-        resumeList.toArray(resumes);
-        return resumes;
+        return storage.values().toArray(resumes);
     }
 
     @Override

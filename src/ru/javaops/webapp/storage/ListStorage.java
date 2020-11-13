@@ -27,8 +27,8 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    protected int getIndex(Resume resume) {
-        return storage.indexOf(resume);
+    protected int getSearchKey(String uuid) {
+        return storage.indexOf(new Resume(uuid));
     }
 
     @Override

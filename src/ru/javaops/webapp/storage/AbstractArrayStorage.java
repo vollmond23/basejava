@@ -22,9 +22,8 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     public void saveElement(Resume resume, int searchKey) {
         if (storageSize == STORAGE_LIMIT) {
             throw new StorageException("ERROR: The array size would be exceeded.", resume.getUuid());
-        } else {
-            insertElement(resume, searchKey);
         }
+        insertElement(resume, searchKey);
         storageSize++;
     }
 

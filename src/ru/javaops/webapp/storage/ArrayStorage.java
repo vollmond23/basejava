@@ -15,9 +15,9 @@ public class ArrayStorage extends AbstractArrayStorage {
     }
 
     @Override
-    protected int getIndex(Resume resume) {
+    protected int getSearchKey(String uuid) {
         for (int i = 0; i < storageSize; i++) {
-            if (storage[i].getUuid().equals(resume.getUuid())) {
+            if (storage[i].getUuid().equals(uuid)) {
                 return i;
             }
         }
