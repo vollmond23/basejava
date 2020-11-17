@@ -2,6 +2,8 @@ package ru.javaops.webapp.storage;
 
 import ru.javaops.webapp.model.Resume;
 
+import java.util.List;
+
 public interface Storage {
 
     void clear();
@@ -14,7 +16,7 @@ public interface Storage {
 
     void delete(Resume resume);
 
-    Resume[] getAll();
-
     int size();
+
+    List<Resume> getAllSorted();
 }

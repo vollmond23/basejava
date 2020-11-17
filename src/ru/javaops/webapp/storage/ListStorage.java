@@ -3,6 +3,7 @@ package ru.javaops.webapp.storage;
 import ru.javaops.webapp.model.Resume;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class ListStorage extends AbstractStorage {
@@ -15,10 +16,10 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    public Resume[] getAll() {
-        Resume[] resumes = new Resume[storage.size()];
-        storage.toArray(resumes);
-        return resumes;
+    public List<Resume> getAllSorted() {
+        List<Resume> sortedResumes = new ArrayList<>(storage);
+        sortedResumes.sort(Comparator.comparing(Resume::getFullName));
+        return sortedResumes;
     }
 
     @Override
@@ -27,27 +28,37 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    protected int getSearchKey(String uuid) {
-        return storage.indexOf(new Resume(uuid));
+    protected boolean isExist(Object searchKey) {
+        return searchKey != null;
     }
 
     @Override
-    protected void saveElement(Resume resume, int searchKey) {
+    protected Integer getSearchKey(String uuid) {
+        for (int i = 0; i < storage.size(); i++) {
+            if (storage.get(i).getUuid().equals(uuid)) {
+                return i;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected void doSave(Resume resume, Object searchKey) {
         storage.add(resume);
     }
 
     @Override
-    protected void deleteElement(Resume resume, int searchKey) {
-        storage.remove(searchKey);
+    protected void doDelete(Object searchKey) {
+        storage.remove(((Integer) searchKey).intValue());
     }
 
     @Override
-    protected void updateElement(Resume resume, int searchKey) {
-        storage.set(searchKey, resume);
+    protected void doUpdate(Resume resume, Object searchKey) {
+        storage.set((Integer) searchKey, resume);
     }
 
     @Override
-    protected Resume getElement(int index, String uuid) {
-        return storage.get(index);
+    protected Resume doGet(Object searchKey) {
+        return storage.get((Integer) searchKey);
     }
 }

@@ -4,6 +4,8 @@ import ru.javaops.webapp.exception.StorageException;
 import ru.javaops.webapp.model.Resume;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Array based storage for Resumes
@@ -19,42 +21,51 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
         storageSize = 0;
     }
 
-    public void saveElement(Resume resume, int searchKey) {
+    @Override
+    protected boolean isExist(Object searchKey) {
+        return (Integer) searchKey >= 0;
+    }
+
+    @Override
+    protected void doSave(Resume resume, Object searchKey) {
         if (storageSize == STORAGE_LIMIT) {
             throw new StorageException("ERROR: The array size would be exceeded.", resume.getUuid());
         }
-        insertElement(resume, searchKey);
+        insertElement(resume, (Integer) searchKey);
         storageSize++;
     }
 
-    public void deleteElement(Resume resume, int searchKey) {
-        fillDeletedElement(searchKey);
+    @Override
+    protected void doDelete(Object searchKey) {
+        fillDeletedElement((Integer) searchKey);
         storage[storageSize - 1] = null;
         storageSize--;
+    }
+
+    @Override
+    protected void doUpdate(Resume resume, Object searchKey) {
+        storage[(Integer) searchKey] = resume;
+    }
+
+    @Override
+    protected Resume doGet(Object searchKey) {
+        return storage[(Integer) searchKey];
     }
 
     public int size() {
         return storageSize;
     }
 
-    /**
-     * @return array, contains only Resumes in storage (without null)
-     */
-    public Resume[] getAll() {
-        return Arrays.copyOf(storage, storageSize);
-    }
-
-    @Override
-    protected void updateElement(Resume resume, int searchKey) {
-        storage[searchKey] = resume;
-    }
-
-    @Override
-    protected Resume getElement(int searchKey, String uuid) {
-        return storage[searchKey];
+    public List<Resume> getAllSorted() {
+        Resume[] resumes = Arrays.copyOf(storage, storageSize);
+        Arrays.sort(resumes, Comparator.comparing(Resume::getFullName));
+        return Arrays.asList(resumes);
     }
 
     protected abstract void fillDeletedElement(int index);
 
     protected abstract void insertElement(Resume resume, int index);
+
+    @Override
+    protected abstract Integer getSearchKey(String uuid);
 }
