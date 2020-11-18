@@ -4,7 +4,6 @@ import ru.javaops.webapp.exception.StorageException;
 import ru.javaops.webapp.model.Resume;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -56,9 +55,9 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
         return storageSize;
     }
 
-    public List<Resume> getAllSorted() {
+    @Override
+    protected List<Resume> getAllResumes() {
         Resume[] resumes = Arrays.copyOf(storage, storageSize);
-        Arrays.sort(resumes, Comparator.comparing(Resume::getFullName));
         return Arrays.asList(resumes);
     }
 

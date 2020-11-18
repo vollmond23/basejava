@@ -2,11 +2,14 @@ package ru.javaops.webapp.storage;
 
 import ru.javaops.webapp.model.Resume;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractMapStorage extends AbstractStorage {
 
-    protected Map<Object, Resume> storage = new HashMap<>();
+    protected Map<String, Resume> storage = new HashMap<>();
 
     @Override
     protected boolean isExist(Object searchKey) {
@@ -29,10 +32,8 @@ public abstract class AbstractMapStorage extends AbstractStorage {
     }
 
     @Override
-    public List<Resume> getAllSorted() {
-        List<Resume> sortedResumes = new ArrayList<>(storage.values());
-        sortedResumes.sort(Comparator.comparing(Resume::getFullName));
-        return sortedResumes;
+    protected List<Resume> getAllResumes() {
+        return new ArrayList<>(storage.values());
     }
 
     @Override

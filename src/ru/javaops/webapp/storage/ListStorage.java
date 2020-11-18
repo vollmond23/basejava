@@ -3,7 +3,6 @@ package ru.javaops.webapp.storage;
 import ru.javaops.webapp.model.Resume;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class ListStorage extends AbstractStorage {
@@ -16,10 +15,8 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    public List<Resume> getAllSorted() {
-        List<Resume> sortedResumes = new ArrayList<>(storage);
-        sortedResumes.sort(Comparator.comparing(Resume::getFullName));
-        return sortedResumes;
+    protected List<Resume> getAllResumes() {
+        return storage;
     }
 
     @Override
