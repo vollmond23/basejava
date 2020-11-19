@@ -12,21 +12,6 @@ public abstract class AbstractMapStorage extends AbstractStorage {
     protected Map<String, Resume> storage = new HashMap<>();
 
     @Override
-    protected boolean isExist(Object searchKey) {
-        return storage.containsKey(searchKey);
-    }
-
-    @Override
-    protected void doDelete(Object searchKey) {
-        storage.remove(searchKey);
-    }
-
-    @Override
-    protected Resume doGet(Object searchKey) {
-        return storage.get(searchKey);
-    }
-
-    @Override
     public void clear() {
         storage.clear();
     }

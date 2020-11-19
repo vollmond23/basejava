@@ -10,10 +10,10 @@ import java.util.List;
  * Array based storage for Resumes
  */
 public abstract class AbstractArrayStorage extends AbstractStorage {
-    protected static final int STORAGE_LIMIT = 10_000;
+    static final int STORAGE_LIMIT = 10_000;
 
     protected Resume[] storage = new Resume[STORAGE_LIMIT];
-    protected int storageSize = 0;
+    int storageSize = 0;
 
     public void clear() {
         Arrays.fill(storage, 0, storageSize, null);
@@ -65,6 +65,5 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
 
     protected abstract void insertElement(Resume resume, int index);
 
-    @Override
     protected abstract Integer getSearchKey(String uuid);
 }
