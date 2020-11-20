@@ -2,18 +2,11 @@ package ru.javaops.webapp.storage;
 
 import ru.javaops.webapp.model.Resume;
 
-import java.util.Map;
-
 public class MapResumeStorage extends AbstractMapStorage {
 
     @Override
     protected Resume getSearchKey(String uuid) {
-        for (Map.Entry<String, Resume> entry : storage.entrySet()) {
-            if (entry.getKey().equals(uuid)) {
-                return entry.getValue();
-            }
-        }
-        return new Resume(uuid, "NEW_RESUME");
+        return storage.get(uuid);
     }
 
     @Override
