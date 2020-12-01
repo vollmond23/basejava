@@ -10,22 +10,12 @@ public class ListSection implements Section {
         content.add(info);
     }
 
-    public void deleteString(int index) {
-        content.remove(index);
-    }
-
-    public void editString(int index, String newString) {
-        content.set(index, newString);
-    }
-
-    public void clear() {
-        content.clear();
-    }
-
     @Override
-    public void printToConsole() {
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
         for (String info : content) {
-            System.out.println("  - " + info);
+            stringBuilder.append("  - ").append(info).append('\n');
         }
+        return stringBuilder.toString();
     }
 }

@@ -1,25 +1,20 @@
 package ru.javaops.webapp.model;
 
-import ru.javaops.webapp.exception.ExistContactException;
-import ru.javaops.webapp.exception.ExistSectionException;
-import ru.javaops.webapp.exception.NotExistContactException;
-import ru.javaops.webapp.exception.NotExistSectionException;
-
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Initial resume class
  */
 public class Resume implements Comparable<Resume> {
 
-    private static final Logger LOG = Logger.getLogger(Resume.class.getName());
-
     // Unique identifier
     private final String uuid;
     private String fullName;
-    private final HashMap<ContactType, String> contacts = new HashMap<>();
-    private final HashMap<SectionType, Section> sections = new LinkedHashMap<>();
+    private final Map<ContactType, String> contacts = new EnumMap<>(ContactType.class);
+    private final Map<SectionType, Section> sections = new EnumMap<>(SectionType.class);
 
     public Resume(String fullName) {
         this(UUID.randomUUID().toString(), fullName);
@@ -29,42 +24,6 @@ public class Resume implements Comparable<Resume> {
         checkNullParameters(uuid, fullName);
         this.uuid = uuid;
         this.fullName = fullName;
-    }
-
-    public void addContact(ContactType contactType, String contact) {
-        checkNullParameters(contactType, contact);
-        checkIfContactExists(contactType);
-        contacts.put(contactType, contact);
-    }
-
-    public void editContact(ContactType contactType, String newContact) {
-        checkNullParameters(contactType, newContact);
-        checkIfContactNotExists(contactType);
-        contacts.put(contactType, newContact);
-    }
-
-    public void deleteContact(ContactType contactType) {
-        checkNullParameters(contactType);
-        checkIfContactNotExists(contactType);
-        contacts.remove(contactType);
-    }
-
-    public void addSection(SectionType sectionType, Section section) {
-        checkNullParameters(sectionType, section);
-        checkIfSectionExists(sectionType);
-        sections.put(sectionType, section);
-    }
-
-    public void editSection(SectionType sectionType, Section newSection) {
-        checkNullParameters(sectionType, newSection);
-        checkIfSectionNotExists(sectionType);
-        sections.put(sectionType, newSection);
-    }
-
-    public void deleteSection(SectionType sectionType) {
-        checkNullParameters(sectionType);
-        checkIfSectionNotExists(sectionType);
-        sections.remove(sectionType);
     }
 
     public String getUuid() {
@@ -78,6 +37,16 @@ public class Resume implements Comparable<Resume> {
     public void setFullName(String fullName) {
         checkNullParameters(fullName);
         this.fullName = fullName;
+    }
+
+    public void addContact(ContactType contactType, String contact) {
+        checkNullParameters(contactType, contact);
+        contacts.put(contactType, contact);
+    }
+
+    public void addSection(SectionType sectionType, Section section) {
+        checkNullParameters(sectionType, section);
+        sections.put(sectionType, section);
     }
 
     @Override
@@ -104,53 +73,22 @@ public class Resume implements Comparable<Resume> {
 
     @Override
     public String toString() {
-        return "uuid = " + uuid + "; fullName = " + fullName;
-    }
-
-    public void printToConsole() {
-        System.out.println(fullName + "\n");
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(fullName).append('\n');
         for (Map.Entry<ContactType, String> entry : contacts.entrySet()) {
-            System.out.println(entry.getKey().getTitle() + ": " + entry.getValue());
+            stringBuilder.append("    ").append(entry.getKey().getTitle()).append(": ").append(entry.getValue()).append('\n');
         }
-        System.out.println();
         for (Map.Entry<SectionType, Section> entry : sections.entrySet()) {
-            System.out.println(entry.getKey().getTitle());
-            entry.getValue().printToConsole();
+            stringBuilder.append(entry.getKey().getTitle()).append('\n').append(entry.getValue());
         }
+        stringBuilder.append('\n');
+        return stringBuilder.toString();
     }
 
     @Override
     public int compareTo(Resume o) {
         int cmp = fullName.compareTo(o.fullName);
         return cmp != 0 ? cmp : uuid.compareTo(o.uuid);
-    }
-
-    private void checkIfContactExists(ContactType contactType) {
-        if (contacts.containsKey(contactType)) {
-            LOG.warning("ERROR: Contact '" + contactType.getTitle() + "' already exist");
-            throw new ExistContactException(contactType.getTitle());
-        }
-    }
-
-    private void checkIfContactNotExists(ContactType contactType) {
-        if (!contacts.containsKey(contactType)) {
-            LOG.warning("ERROR: Contact '" + contactType.getTitle() + "' does not exist");
-            throw new NotExistContactException(contactType.getTitle());
-        }
-    }
-
-    private void checkIfSectionExists(SectionType sectionType) {
-        if (sections.containsKey(sectionType)) {
-            LOG.warning("ERROR: Section '" + sectionType.getTitle() + "' already exist");
-            throw new ExistSectionException(sectionType.getTitle());
-        }
-    }
-
-    private void checkIfSectionNotExists(SectionType sectionType) {
-        if (!sections.containsKey(sectionType)) {
-            LOG.warning("ERROR: Section '" + sectionType.getTitle() + "' does not exist");
-            throw new NotExistSectionException(sectionType.getTitle());
-        }
     }
 
     @SafeVarargs
