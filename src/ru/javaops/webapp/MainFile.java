@@ -5,6 +5,23 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 public class MainFile {
+
+    public static void printFiles(String filePath, String tab) {
+        File file = new File(filePath);
+        if (file.isDirectory()) {
+            System.out.println(tab + file.getName() + "(dir)");
+            tab += "- ";
+            File[] fileList = file.listFiles();
+            if (fileList != null) {
+                for (File file1 : fileList) {
+                    printFiles(file1.getAbsolutePath(), tab);
+                }
+            }
+        } else {
+            System.out.println(tab + file.getName());
+        }
+    }
+
     public static void main(String[] args) {
         String filePath = ".\\.gitignore";
         File file = new File(filePath);
@@ -26,7 +43,7 @@ public class MainFile {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-    
 
+        printFiles(".", "");
+    }
 }
