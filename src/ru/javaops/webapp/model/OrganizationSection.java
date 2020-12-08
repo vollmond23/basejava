@@ -1,13 +1,22 @@
 package ru.javaops.webapp.model;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class OrganizationSection implements Section {
-    private final List<Experience> content = new ArrayList<>();
+public class OrganizationSection extends Section {
+    private final List<Organization> content;
 
-    public void addExperience(Experience experience) {
-        content.add(experience);
+    public OrganizationSection(List<Organization> content) {
+        Objects.requireNonNull(content, "Organizations must not be null");
+        this.content = content;
+    }
+
+    public void addOrganization(Organization organization) {
+        content.add(organization);
+    }
+
+    public List<Organization> getContent() {
+        return content;
     }
 
     public void clear() {
@@ -15,9 +24,24 @@ public class OrganizationSection implements Section {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        OrganizationSection that = (OrganizationSection) o;
+
+        return content.equals(that.content);
+    }
+
+    @Override
+    public int hashCode() {
+        return content.hashCode();
+    }
+
+    @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        for (Experience exp : content) {
+        for (Organization exp : content) {
             stringBuilder.append(exp).append('\n');
         }
         return stringBuilder.toString();

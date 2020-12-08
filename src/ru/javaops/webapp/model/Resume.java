@@ -30,23 +30,22 @@ public class Resume implements Comparable<Resume> {
         return uuid;
     }
 
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        checkNullParameters(fullName);
-        this.fullName = fullName;
-    }
-
     public void addContact(ContactType contactType, String contact) {
         checkNullParameters(contactType, contact);
         contacts.put(contactType, contact);
     }
 
+    public String getContact(ContactType type) {
+        return contacts.get(type);
+    }
+
     public void addSection(SectionType sectionType, Section section) {
         checkNullParameters(sectionType, section);
         sections.put(sectionType, section);
+    }
+
+    public Section getSection(SectionType type) {
+        return sections.get(type);
     }
 
     @Override

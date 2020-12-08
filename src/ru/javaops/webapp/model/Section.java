@@ -1,4 +1,4 @@
 package ru.javaops.webapp.model;
 
-public interface Section {
+abstract public class Section {
 }

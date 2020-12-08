@@ -1,13 +1,37 @@
 package ru.javaops.webapp.model;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class ListSection implements Section {
-    private final List<String> content = new ArrayList<>();
+public class ListSection extends Section {
+    private final List<String> content;
+
+    public ListSection(List<String> content) {
+        Objects.requireNonNull(content, "listsection must not be null");
+        this.content = content;
+    }
 
     public void addString(String info) {
         content.add(info);
+    }
+
+    public List<String> getContent() {
+        return content;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ListSection that = (ListSection) o;
+
+        return content.equals(that.content);
+    }
+
+    @Override
+    public int hashCode() {
+        return content.hashCode();
     }
 
     @Override
