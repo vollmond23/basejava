@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 public abstract class AbstractStorage<SK> implements Storage {
 
-//    protected final Logger log = Logger.getLogger(getClass().getName());
     private static final Logger LOG = Logger.getLogger(AbstractStorage.class.getName());
 
     protected abstract boolean isExist(SK searchKey);
@@ -29,21 +28,21 @@ public abstract class AbstractStorage<SK> implements Storage {
 
     @Override
     public void delete(Resume resume) {
-        LOG.info("Delete " + resume);
+        LOG.info("Delete " + resume.getUuid());
         SK searchKey = getExistedSearchKey(resume);
         doDelete(searchKey);
     }
 
     @Override
     public void save(Resume resume) {
-        LOG.info("Save " + resume);
+        LOG.info("Save " + resume.getUuid());
         SK searchKey = getNotExistedSearchKey(resume);
         doSave(resume, searchKey);
     }
 
     @Override
     public void update(Resume resume) {
-        LOG.info("Update " + resume);
+        LOG.info("Update " + resume.getUuid());
         SK searchKey = getExistedSearchKey(resume);
         doUpdate(resume, searchKey);
     }
@@ -58,7 +57,7 @@ public abstract class AbstractStorage<SK> implements Storage {
     private SK getNotExistedSearchKey(Resume resume) {
         SK searchKey = getSearchKey(resume.getUuid());
         if (isExist(searchKey)) {
-            LOG.warning("ERROR: Resume " + resume + " already exists.");
+            LOG.warning("ERROR: Resume " + resume.getUuid() + " already exists.");
             throw new ExistStorageException(resume.getUuid());
         }
         return searchKey;
@@ -67,7 +66,7 @@ public abstract class AbstractStorage<SK> implements Storage {
     private SK getExistedSearchKey(Resume resume) {
         SK searchKey = getSearchKey(resume.getUuid());
         if (!isExist(searchKey)) {
-            LOG.warning("ERROR: Resume " + resume + " is not exists.");
+            LOG.warning("ERROR: Resume " + resume.getUuid() + " is not exists.");
             throw new NotExistStorageException(resume.getUuid());
         }
         return searchKey;

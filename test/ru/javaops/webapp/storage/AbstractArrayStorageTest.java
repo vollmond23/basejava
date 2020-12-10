@@ -1,8 +1,10 @@
 package ru.javaops.webapp.storage;
 
 import org.junit.Test;
+import ru.javaops.webapp.ResumeTestData;
 import ru.javaops.webapp.exception.StorageException;
-import ru.javaops.webapp.model.Resume;
+
+import java.util.UUID;
 
 import static org.junit.Assert.fail;
 
@@ -18,11 +20,12 @@ public abstract class AbstractArrayStorageTest extends AbstractStorageTest {
         int length = AbstractArrayStorage.STORAGE_LIMIT;
         for (int i = 0; i < length; i++) {
             try {
-                storage.save(new Resume("NEW_RESUME"));
+                storage.save(ResumeTestData.createResume(UUID.randomUUID().toString(), "NEW_RESUME"));
+                System.out.println(i);
             } catch (StorageException e) {
                 fail("Overflow was too soon.");
             }
         }
-        storage.save(new Resume("NEW_RESUME"));
+        storage.save(ResumeTestData.createResume(UUID.randomUUID().toString(),"NEW_RESUME"));
     }
 }
