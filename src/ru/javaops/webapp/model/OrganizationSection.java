@@ -1,10 +1,17 @@
 package ru.javaops.webapp.model;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 public class OrganizationSection extends Section {
+    private static final long serialVersionUID = 1L;
+
     private final List<Organization> content;
+
+    public OrganizationSection(Organization... organizations) {
+        this(Arrays.asList(organizations));
+    }
 
     public OrganizationSection(List<Organization> content) {
         Objects.requireNonNull(content, "Organizations must not be null");

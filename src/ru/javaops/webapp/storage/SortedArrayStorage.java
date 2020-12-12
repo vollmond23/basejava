@@ -1,6 +1,5 @@
 package ru.javaops.webapp.storage;
 
-import ru.javaops.webapp.ResumeTestData;
 import ru.javaops.webapp.model.Resume;
 
 import java.util.Arrays;
@@ -25,6 +24,6 @@ public class SortedArrayStorage extends AbstractArrayStorage {
 
     @Override
     protected Integer getSearchKey(String uuid) {
-        return Arrays.binarySearch(storage, 0, storageSize, ResumeTestData.createResume(uuid, uuid), RESUME_COMPARATOR);
+        return Arrays.binarySearch(storage, 0, storageSize, new Resume(uuid, uuid), RESUME_COMPARATOR);
     }
 }
