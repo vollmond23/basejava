@@ -29,6 +29,29 @@ public class Organization implements Serializable {
             this.title = title;
             this.description = description;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Position position = (Position) o;
+
+            if (!dateBegin.equals(position.dateBegin)) return false;
+            if (!Objects.equals(dateEnd, position.dateEnd)) return false;
+            if (!Objects.equals(description, position.description))
+                return false;
+            return title.equals(position.title);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = dateBegin.hashCode();
+            result = 31 * result + (dateEnd != null ? dateEnd.hashCode() : 0);
+            result = 31 * result + (description != null ? description.hashCode() : 0);
+            result = 31 * result + title.hashCode();
+            return result;
+        }
     }
 
     public Organization(String name, String url, LocalDate dateBegin, LocalDate dateEnd, String title, String description) {
