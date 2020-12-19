@@ -4,8 +4,6 @@ import ru.javaops.webapp.exception.StorageException;
 import ru.javaops.webapp.model.Resume;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,9 +14,7 @@ import java.util.Objects;
 public abstract class AbstractPathStorage extends AbstractStorage<Path> {
     private final Path directory;
 
-    protected abstract void doWrite(Resume resume, OutputStream path) throws IOException;
-
-    protected abstract Resume doRead(InputStream path) throws IOException;
+    private IOStrategy ioStrategy;
 
     protected AbstractPathStorage(String dir) {
         directory = Paths.get(dir);
@@ -29,6 +25,10 @@ public abstract class AbstractPathStorage extends AbstractStorage<Path> {
         if (!Files.isReadable(directory) || !Files.isWritable(directory)) {
             throw new IllegalArgumentException(dir + " is not readable/writable");
         }
+    }
+
+    public void setIoStrategy(IOStrategy ioStrategy) {
+        this.ioStrategy = ioStrategy;
     }
 
     @Override
@@ -63,7 +63,7 @@ public abstract class AbstractPathStorage extends AbstractStorage<Path> {
     @Override
     protected void doUpdate(Resume resume, Path path) {
         try {
-            doWrite(resume, Files.newOutputStream(path));
+            ioStrategy.doWrite(resume, Files.newOutputStream(path));
         } catch (IOException e) {
             throw new StorageException("Path write error", path.getFileName().toString(), e);
         }
@@ -72,7 +72,7 @@ public abstract class AbstractPathStorage extends AbstractStorage<Path> {
     @Override
     protected Resume doGet(Path path) {
         try {
-            return doRead(Files.newInputStream(path));
+            return ioStrategy.doRead(Files.newInputStream(path));
         } catch (IOException e) {
             throw new StorageException("Path read error", path.getFileName().toString(), e);
         }
