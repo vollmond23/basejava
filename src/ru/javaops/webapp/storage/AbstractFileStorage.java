@@ -11,9 +11,7 @@ import java.util.Objects;
 public abstract class AbstractFileStorage extends AbstractStorage<File> {
     private final File directory;
 
-    protected abstract void doWrite(Resume resume, OutputStream file) throws IOException;
-
-    protected abstract Resume doRead(InputStream file) throws IOException;
+    private IOStrategy ioStrategy;
 
     protected AbstractFileStorage(File directory) {
         Objects.requireNonNull(directory, "directory must not be null");
@@ -24,6 +22,10 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
             throw new IllegalArgumentException(directory.getAbsolutePath() + " is not readable/writable");
         }
         this.directory = directory;
+    }
+
+    public void setIoStrategy(IOStrategy ioStrategy) {
+        this.ioStrategy = ioStrategy;
     }
 
     @Override
@@ -56,7 +58,7 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
     @Override
     protected void doUpdate(Resume resume, File file) {
         try {
-            doWrite(resume, new BufferedOutputStream(new FileOutputStream(file)));
+            ioStrategy.doWrite(resume, new BufferedOutputStream(new FileOutputStream(file)));
         } catch (IOException e) {
             throw new StorageException("File write error", file.getName(), e);
         }
@@ -65,7 +67,7 @@ public abstract class AbstractFileStorage extends AbstractStorage<File> {
     @Override
     protected Resume doGet(File file) {
         try {
-            return doRead(new BufferedInputStream(new FileInputStream(file)));
+            return ioStrategy.doRead(new BufferedInputStream(new FileInputStream(file)));
         } catch (IOException e) {
             throw new StorageException("File read error", file.getName(), e);
         }
