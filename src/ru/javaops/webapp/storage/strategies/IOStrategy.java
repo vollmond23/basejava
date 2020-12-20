@@ -1,4 +1,4 @@
-package ru.javaops.webapp.storage;
+package ru.javaops.webapp.storage.strategies;
 
 import ru.javaops.webapp.model.Resume;
 

@@ -2,6 +2,7 @@ package ru.javaops.webapp.storage;
 
 import ru.javaops.webapp.exception.StorageException;
 import ru.javaops.webapp.model.Resume;
+import ru.javaops.webapp.storage.strategies.IOStrategy;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -11,10 +12,11 @@ import java.util.Objects;
 public class FileStorage extends AbstractStorage<File> {
     private final File directory;
 
-    private IOStrategy ioStrategy = new ObjectStreamStrategy();
+    private IOStrategy ioStrategy;
 
-    protected FileStorage(File directory) {
+    protected FileStorage(File directory, IOStrategy ioStrategy) {
         Objects.requireNonNull(directory, "directory must not be null");
+        Objects.requireNonNull(ioStrategy, "strategy must not be null");
         if (!directory.isDirectory()) {
             throw new IllegalArgumentException(directory.getAbsolutePath() + " is not directory");
         }
@@ -22,6 +24,7 @@ public class FileStorage extends AbstractStorage<File> {
             throw new IllegalArgumentException(directory.getAbsolutePath() + " is not readable/writable");
         }
         this.directory = directory;
+        this.ioStrategy = ioStrategy;
     }
 
     public void setIoStrategy(IOStrategy ioStrategy) {
