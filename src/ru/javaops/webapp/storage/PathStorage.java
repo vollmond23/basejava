@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -83,20 +82,20 @@ public class PathStorage extends AbstractStorage<Path> {
 
     @Override
     protected List<Resume> getAllResumes() {
-        return getFileList(directory).map(this::doGet).collect(Collectors.toCollection(ArrayList::new));
+        return getFileList().map(this::doGet).collect(Collectors.toList());
     }
 
     @Override
     public void clear() {
-        getFileList(directory).forEach(this::doDelete);
+        getFileList().forEach(this::doDelete);
     }
 
     @Override
     public int size() {
-        return (int) getFileList(directory).count();
+        return (int) getFileList().count();
     }
 
-    private Stream<Path> getFileList(Path directory) {
+    private Stream<Path> getFileList() {
         try {
             return Files.list(directory);
         } catch (IOException e) {

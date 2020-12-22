@@ -5,9 +5,10 @@ import ru.javaops.webapp.model.Resume;
 import ru.javaops.webapp.storage.strategies.IOStrategy;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FileStorage extends AbstractStorage<File> {
     private final File directory;
@@ -74,29 +75,20 @@ public class FileStorage extends AbstractStorage<File> {
 
     @Override
     protected List<Resume> getAllResumes() {
-        List<Resume> listResume = new ArrayList<>();
-        File[] listFiles = getFilesInDirectory(directory);
-        for (File file : listFiles) {
-            listResume.add(doGet(file));
-        }
-        return listResume;
+        return Stream.of(getFilesInDirectory()).map(this::doGet).collect(Collectors.toList());
     }
 
     @Override
     public void clear() {
-        File[] listFiles = getFilesInDirectory(directory);
-        for (File file : listFiles) {
-            doDelete(file);
-        }
+        Stream.of(getFilesInDirectory()).forEach(this::doDelete);
     }
 
     @Override
     public int size() {
-        File[] listFiles = getFilesInDirectory(directory);
-        return listFiles.length;
+        return (int) Stream.of(getFilesInDirectory()).count();
     }
 
-    private File[] getFilesInDirectory(File directory) {
+    private File[] getFilesInDirectory() {
         File[] listFiles = directory.listFiles();
         if (listFiles == null) {
             throw new StorageException("Directory read error", null);
