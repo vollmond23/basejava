@@ -1,5 +1,11 @@
 package ru.javaops.webapp.model;
 
+import ru.javaops.webapp.util.DateUtil;
+import ru.javaops.webapp.util.LocalDateAdapter;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -7,22 +13,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Organization implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final Link homePage;
+    private Link homePage;
     private final List<Position> positions = new ArrayList<>();
 
-    private static class Position implements Serializable {
-        private static final long serialVersionUID = 1L;
+    @XmlAccessorType(XmlAccessType.FIELD)
 
-        private final LocalDate dateBegin;
-        private final LocalDate dateEnd;
-        private final String description;
-        private final String title;
+    public static class Position implements Serializable {
+        private static final long serialVersionUID = 1L;
+        @XmlJavaTypeAdapter(value = LocalDateAdapter.class)
+        private LocalDate dateBegin;
+        @XmlJavaTypeAdapter(value = LocalDateAdapter.class)
+        private LocalDate dateEnd;
+        private String description;
+        private String title;
+
+        public Position() {
+        }
 
         public Position(LocalDate dateBegin, LocalDate dateEnd, String title, String description) {
             Objects.requireNonNull(dateBegin, "dateBegin must not be null");
+            Objects.requireNonNull(dateEnd, "dateEnd must not be null");
             Objects.requireNonNull(title, "title must not be null");
             this.dateBegin = dateBegin;
             this.dateEnd = dateEnd;
@@ -38,7 +52,7 @@ public class Organization implements Serializable {
             Position position = (Position) o;
 
             if (!dateBegin.equals(position.dateBegin)) return false;
-            if (!Objects.equals(dateEnd, position.dateEnd)) return false;
+            if (!dateEnd.equals(position.dateEnd)) return false;
             if (!Objects.equals(description, position.description))
                 return false;
             return title.equals(position.title);
@@ -47,11 +61,14 @@ public class Organization implements Serializable {
         @Override
         public int hashCode() {
             int result = dateBegin.hashCode();
-            result = 31 * result + (dateEnd != null ? dateEnd.hashCode() : 0);
+            result = 31 * result + dateEnd.hashCode();
             result = 31 * result + (description != null ? description.hashCode() : 0);
             result = 31 * result + title.hashCode();
             return result;
         }
+    }
+
+    public Organization() {
     }
 
     public Organization(String name, String url, LocalDate dateBegin, LocalDate dateEnd, String title, String description) {
@@ -86,7 +103,7 @@ public class Organization implements Serializable {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
         StringBuilder periodString = new StringBuilder();
         for (Position position : positions) {
-            periodString.append('\n').append("    ").append(position.dateBegin.format(formatter)).append(" - ").append((!Objects.isNull(position.dateEnd) ? position.dateEnd.format(formatter) : "Сейчас")).
+            periodString.append('\n').append("    ").append(position.dateBegin.format(formatter)).append(" - ").append((!position.dateEnd.equals(DateUtil.NOW) ? position.dateEnd.format(formatter) : "Сейчас")).
                     append(":  ").append(position.title).
                     append(!Objects.isNull(position.description) ? "\n    " + position.description : "");
         }

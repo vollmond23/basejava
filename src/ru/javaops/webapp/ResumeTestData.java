@@ -38,7 +38,7 @@ public class ResumeTestData {
         resume.addSection(SectionType.QUALIFICATIONS, new ListSection(qualifications));
 
         List<Organization> jobs = new ArrayList<>();
-        jobs.add(new Organization("Java Online Projects", "http://javaops.ru/", DateUtil.of(2013, Month.OCTOBER), null, "Автор проекта.", "Создание, организация и проведение Java онлайн проектов и стажировок."));
+        jobs.add(new Organization("Java Online Projects", "http://javaops.ru/", DateUtil.of(2013, Month.OCTOBER), DateUtil.NOW, "Автор проекта.", "Создание, организация и проведение Java онлайн проектов и стажировок."));
         jobs.add(new Organization("Wrike", "https://www.wrike.com/", DateUtil.of(2014, Month.OCTOBER), DateUtil.of(2016, Month.JANUARY), "Старший разработчик (backend)", "Проектирование и разработка онлайн платформы управления проектами Wrike (Java 8 API, Maven, Spring, MyBatis, Guava, Vaadin, PostgreSQL, Redis). Двухфакторная аутентификация, авторизация по OAuth1, OAuth2, JWT SSO."));
         resume.addSection(SectionType.EXPERIENCE, new OrganizationSection(jobs));
 
@@ -92,7 +92,7 @@ public class ResumeTestData {
         resume.addSection(SectionType.QUALIFICATIONS, new ListSection(qualifications));
 
         List<Organization> jobs = new ArrayList<>();
-        jobs.add(new Organization("Java Online Projects", "http://javaops.ru/", DateUtil.of(2013, Month.OCTOBER), null, "Автор проекта.", "Создание, организация и проведение Java онлайн проектов и стажировок."));
+        jobs.add(new Organization("Java Online Projects", "http://javaops.ru/", DateUtil.of(2013, Month.OCTOBER), DateUtil.NOW, "Автор проекта.", "Создание, организация и проведение Java онлайн проектов и стажировок."));
         jobs.add(new Organization("Wrike", "https://www.wrike.com/", DateUtil.of(2014, Month.OCTOBER), DateUtil.of(2016, Month.JANUARY), "Старший разработчик (backend)", "Проектирование и разработка онлайн платформы управления проектами Wrike (Java 8 API, Maven, Spring, MyBatis, Guava, Vaadin, PostgreSQL, Redis). Двухфакторная аутентификация, авторизация по OAuth1, OAuth2, JWT SSO."));
         jobs.add(new Organization("RIT Center", null, DateUtil.of(2012, Month.APRIL), DateUtil.of(2014, Month.OCTOBER), "Java архитектор", "Организация процесса разработки системы ERP для разных окружений: релизная политика, версионирование, ведение CI (Jenkins), миграция базы (кастомизация Flyway), конфигурирование системы (pgBoucer, Nginx), AAA via SSO. Архитектура БД и серверной части системы. Разработка интергационных сервисов: CMIS, BPMN2, 1C (WebServices), сервисов общего назначения (почта, экспорт в pdf, doc, html). Интеграция Alfresco JLAN для online редактирование из браузера документов MS Office. Maven + plugin development, Ant, Apache Commons, Spring security, Spring MVC, Tomcat,WSO2, xcmis, OpenCmis, Bonita, Python scripting, Unix shell remote scripting via ssh tunnels, PL/Python"));
         jobs.add(new Organization("Luxoft (Deutsche Bank)", "http://www.luxoft.ru/", DateUtil.of(2010, Month.DECEMBER), DateUtil.of(2012, Month.APRIL), "Ведущий программист", "Участие в проекте Deutsche Bank CRM (WebLogic, Hibernate, Spring, Spring MVC, SmartGWT, GWT, Jasper, Oracle). Реализация клиентской и серверной части CRM. Реализация RIA-приложения для администрирования, мониторинга и анализа результатов в области алгоритмического трейдинга. JPA, Spring, Spring-MVC, GWT, ExtGWT (GXT), Highstock, Commet, HTML5."));

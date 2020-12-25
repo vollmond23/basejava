@@ -1,13 +1,19 @@
 package ru.javaops.webapp.model;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class OrganizationSection extends Section {
     private static final long serialVersionUID = 1L;
 
-    private final List<Organization> content;
+    private List<Organization> content;
+
+    public OrganizationSection() {
+    }
 
     public OrganizationSection(Organization... organizations) {
         this(Arrays.asList(organizations));
