@@ -18,7 +18,7 @@ public class Organization implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Link homePage;
-    private final List<Position> positions = new ArrayList<>();
+    private List<Position> positions = new ArrayList<>();
 
     @XmlAccessorType(XmlAccessType.FIELD)
 
@@ -28,8 +28,8 @@ public class Organization implements Serializable {
         private LocalDate dateBegin;
         @XmlJavaTypeAdapter(value = LocalDateAdapter.class)
         private LocalDate dateEnd;
-        private String description;
         private String title;
+        private String description;
 
         public Position() {
         }
@@ -42,6 +42,22 @@ public class Organization implements Serializable {
             this.dateEnd = dateEnd;
             this.title = title;
             this.description = description;
+        }
+
+        public LocalDate getDateBegin() {
+            return dateBegin;
+        }
+
+        public LocalDate getDateEnd() {
+            return dateEnd;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getDescription() {
+            return description;
         }
 
         @Override
@@ -76,8 +92,21 @@ public class Organization implements Serializable {
         addPosition(dateBegin, dateEnd, title, description);
     }
 
+    public Organization(Link homePage, List<Position> positionList) {
+        this.homePage = homePage;
+        this.positions = positionList;
+    }
+
     public void addPosition(LocalDate dateBegin, LocalDate dateEnd, String title, String description) {
         positions.add(new Position(dateBegin, dateEnd, title, description));
+    }
+
+    public Link getHomePage() {
+        return homePage;
+    }
+
+    public List<Position> getPositions() {
+        return positions;
     }
 
     @Override
