@@ -1,23 +1,23 @@
 package ru.javaops.webapp.storage.serializer;
 
 import ru.javaops.webapp.model.*;
+import ru.javaops.webapp.util.BiConsumerWithIOException;
+import ru.javaops.webapp.util.ConsumerWithIOException;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataStreamSerializer implements StreamSerializer {
 
     @Override
     public void doWrite(Resume resume, OutputStream os) throws IOException {
         try (DataOutputStream dos = new DataOutputStream(os)) {
-            writeUTFtoDOS(dos, resume.getUuid(), resume.getFullName());
-            Map<ContactType, String> contacts = resume.getContacts();
-            dos.writeInt(contacts.size());
-            contacts.forEach((key, value) -> writeUTFtoDOS(dos, key.name(), value));
-            resume.getSections().forEach((key, value) -> writeSection(dos, key, value));
+            dos.writeUTF(resume.getUuid());
+            dos.writeUTF(resume.getFullName());
+            dos.writeInt(resume.getContacts().size());
+            writeMapWithException(resume.getContacts(), (key, value) -> {dos.writeUTF(key.name()); dos.writeUTF(value);});
+            writeMapWithException(resume.getSections(), (key, value) -> writeSection(dos, key, value));
         }
     }
 
@@ -36,35 +36,34 @@ public class DataStreamSerializer implements StreamSerializer {
         }
     }
 
-    private void writeSection(DataOutputStream dos, SectionType sectionType, Section section) {
+    private void writeSection(DataOutputStream dos, SectionType sectionType, Section section) throws IOException {
         switch (sectionType) {
             case PERSONAL:
             case OBJECTIVE:
-                writeUTFtoDOS(dos, sectionType.name(), ((TextSection) section).getContent());
+                dos.writeUTF(sectionType.name());
+                dos.writeUTF(((TextSection) section).getContent());
                 break;
             case ACHIEVEMENT:
             case QUALIFICATIONS:
-                writeUTFtoDOS(dos, sectionType.name());
-                List<String> list = ((ListSection) section).getContent();
-                writeIntToDOS(dos, list.size());
-                writeUTFtoDOS(dos, list.toArray(new String[0]));
+                dos.writeUTF(sectionType.name());
+                dos.writeInt(((ListSection) section).getContent().size());
+                writeColWithException(((ListSection) section).getContent(), dos::writeUTF);
                 break;
             case EXPERIENCE:
             case EDUCATION:
-                writeUTFtoDOS(dos, sectionType.name());
-                List<Organization> listOrg = ((OrganizationSection) section).getContent();
-                writeIntToDOS(dos, listOrg.size());
-                for (Organization organization : listOrg) {
-                    Link link = organization.getHomePage();
-                    writeUTFtoDOS(dos, link.getName(), link.getUrl());
-                    List<Organization.Position> positionList = organization.getPositions();
-                    writeIntToDOS(dos, positionList.size());
-                    positionList.forEach(x -> writeUTFtoDOS(dos,
-                            x.getDateBegin().toString(),
-                            x.getDateEnd().toString(),
-                            x.getTitle(),
-                            x.getDescription() != null ? x.getDescription() : ""));
-                }
+                dos.writeUTF(sectionType.name());
+                dos.writeInt(((OrganizationSection) section).getContent().size());
+                writeColWithException(((OrganizationSection) section).getContent(), x -> {
+                    dos.writeUTF(x.getHomePage().getName());
+                    dos.writeUTF(x.getHomePage().getUrl() != null ? x.getHomePage().getUrl() : "");
+                    dos.writeInt(x.getPositions().size());
+                    writeColWithException(x.getPositions(), y -> {
+                        dos.writeUTF(y.getDateBegin().toString());
+                        dos.writeUTF(y.getDateEnd().toString());
+                        dos.writeUTF(y.getTitle());
+                        dos.writeUTF(y.getDescription() != null ? y.getDescription() : "");
+                    });
+                });
                 break;
         }
     }
@@ -91,7 +90,9 @@ public class DataStreamSerializer implements StreamSerializer {
                     int listOrgSize = dis.readInt();
                     List<Organization> listOrg = new ArrayList<>(listOrgSize);
                     for (int i = 0; i < listOrgSize; i++) {
-                        Link homePage = new Link(dis.readUTF(), dis.readUTF());
+                        String homePageName = dis.readUTF();
+                        String homePageURL = dis.readUTF();
+                        Link homePage = new Link(homePageName, homePageURL.equals("") ? null : homePageURL);
                         int positionListSize = dis.readInt();
                         List<Organization.Position> positions = new ArrayList<>(positionListSize);
                         for (int j = 0; j < positionListSize; j++) {
@@ -113,23 +114,24 @@ public class DataStreamSerializer implements StreamSerializer {
         }
     }
 
-    private void writeUTFtoDOS(DataOutputStream dos, String... strings) {
-        for (String string : strings) {
-            try {
-                dos.writeUTF(string);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+    private <T> void writeColWithException(Collection<T> collection, ConsumerWithIOException<? super T> action) throws IOException {
+        for (T t : collection) {
+            action.accept(t);
         }
     }
 
-    private void writeIntToDOS(DataOutputStream dos, int... ints) {
-        for (int intElement : ints) {
+    private <K, V> void writeMapWithException(Map<K, V> map, BiConsumerWithIOException<? super K, ? super V> action) throws IOException {
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            K k;
+            V v;
             try {
-                dos.writeInt(intElement);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                k = entry.getKey();
+                v = entry.getValue();
+            } catch(IllegalStateException ise) {
+                // this usually means the entry is no longer in the map.
+                throw new ConcurrentModificationException(ise);
             }
+            action.accept(k, v);
         }
     }
 }
