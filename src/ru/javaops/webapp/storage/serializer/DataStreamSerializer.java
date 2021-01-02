@@ -1,8 +1,6 @@
 package ru.javaops.webapp.storage.serializer;
 
 import ru.javaops.webapp.model.*;
-import ru.javaops.webapp.util.BiConsumerWithIOException;
-import ru.javaops.webapp.util.ConsumerWithIOException;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -16,8 +14,8 @@ public class DataStreamSerializer implements StreamSerializer {
             dos.writeUTF(resume.getUuid());
             dos.writeUTF(resume.getFullName());
             dos.writeInt(resume.getContacts().size());
-            writeMapWithException(resume.getContacts(), (key, value) -> {dos.writeUTF(key.name()); dos.writeUTF(value);});
-            writeMapWithException(resume.getSections(), (key, value) -> writeSection(dos, key, value));
+            writeWithException(resume.getContacts().entrySet(), x -> {dos.writeUTF(x.getKey().name()); dos.writeUTF(x.getValue());});
+            writeWithException(resume.getSections().entrySet(), x -> writeSection(dos, x.getKey(), x.getValue()));
         }
     }
 
@@ -47,17 +45,17 @@ public class DataStreamSerializer implements StreamSerializer {
             case QUALIFICATIONS:
                 dos.writeUTF(sectionType.name());
                 dos.writeInt(((ListSection) section).getContent().size());
-                writeColWithException(((ListSection) section).getContent(), dos::writeUTF);
+                writeWithException(((ListSection) section).getContent(), dos::writeUTF);
                 break;
             case EXPERIENCE:
             case EDUCATION:
                 dos.writeUTF(sectionType.name());
                 dos.writeInt(((OrganizationSection) section).getContent().size());
-                writeColWithException(((OrganizationSection) section).getContent(), x -> {
+                writeWithException(((OrganizationSection) section).getContent(), x -> {
                     dos.writeUTF(x.getHomePage().getName());
                     dos.writeUTF(x.getHomePage().getUrl() != null ? x.getHomePage().getUrl() : "");
                     dos.writeInt(x.getPositions().size());
-                    writeColWithException(x.getPositions(), y -> {
+                    writeWithException(x.getPositions(), y -> {
                         dos.writeUTF(y.getDateBegin().toString());
                         dos.writeUTF(y.getDateEnd().toString());
                         dos.writeUTF(y.getTitle());
@@ -114,24 +112,9 @@ public class DataStreamSerializer implements StreamSerializer {
         }
     }
 
-    private <T> void writeColWithException(Collection<T> collection, ConsumerWithIOException<? super T> action) throws IOException {
+    private <T> void writeWithException(Collection<T> collection, ConsumerWithIOException<? super T> action) throws IOException {
         for (T t : collection) {
             action.accept(t);
-        }
-    }
-
-    private <K, V> void writeMapWithException(Map<K, V> map, BiConsumerWithIOException<? super K, ? super V> action) throws IOException {
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            K k;
-            V v;
-            try {
-                k = entry.getKey();
-                v = entry.getValue();
-            } catch(IllegalStateException ise) {
-                // this usually means the entry is no longer in the map.
-                throw new ConcurrentModificationException(ise);
-            }
-            action.accept(k, v);
         }
     }
 }
