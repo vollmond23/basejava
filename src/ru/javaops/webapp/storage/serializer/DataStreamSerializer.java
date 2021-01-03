@@ -4,18 +4,22 @@ import ru.javaops.webapp.model.*;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class DataStreamSerializer implements StreamSerializer {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Override
     public void doWrite(Resume resume, OutputStream os) throws IOException {
         try (DataOutputStream dos = new DataOutputStream(os)) {
             dos.writeUTF(resume.getUuid());
             dos.writeUTF(resume.getFullName());
-            dos.writeInt(resume.getContacts().size());
-            writeWithException(resume.getContacts().entrySet(), x -> {dos.writeUTF(x.getKey().name()); dos.writeUTF(x.getValue());});
-            writeWithException(resume.getSections().entrySet(), x -> writeSection(dos, x.getKey(), x.getValue()));
+            writeWithException(resume.getContacts().entrySet(), dos, x -> {
+                dos.writeUTF(x.getKey().name());
+                dos.writeUTF(x.getValue());
+            });
+            writeWithException(resume.getSections().entrySet(), dos, x -> writeSection(dos, x.getKey(), x.getValue()));
         }
     }
 
@@ -44,22 +48,21 @@ public class DataStreamSerializer implements StreamSerializer {
             case ACHIEVEMENT:
             case QUALIFICATIONS:
                 dos.writeUTF(sectionType.name());
-                dos.writeInt(((ListSection) section).getContent().size());
-                writeWithException(((ListSection) section).getContent(), dos::writeUTF);
+                writeWithException(((ListSection) section).getContent(), dos, dos::writeUTF);
                 break;
             case EXPERIENCE:
             case EDUCATION:
                 dos.writeUTF(sectionType.name());
-                dos.writeInt(((OrganizationSection) section).getContent().size());
-                writeWithException(((OrganizationSection) section).getContent(), x -> {
+                writeWithException(((OrganizationSection) section).getContent(), dos, x -> {
                     dos.writeUTF(x.getHomePage().getName());
-                    dos.writeUTF(x.getHomePage().getUrl() != null ? x.getHomePage().getUrl() : "");
-                    dos.writeInt(x.getPositions().size());
-                    writeWithException(x.getPositions(), y -> {
-                        dos.writeUTF(y.getDateBegin().toString());
-                        dos.writeUTF(y.getDateEnd().toString());
+                    String url = x.getHomePage().getUrl();
+                    dos.writeUTF(url != null ? url : "");
+                    writeWithException(x.getPositions(), dos, y -> {
+                        dos.writeUTF(y.getDateBegin().format(FORMATTER));
+                        dos.writeUTF(y.getDateEnd().format(FORMATTER));
                         dos.writeUTF(y.getTitle());
-                        dos.writeUTF(y.getDescription() != null ? y.getDescription() : "");
+                        String description = y.getDescription();
+                        dos.writeUTF(description != null ? description : "");
                     });
                 });
                 break;
@@ -67,7 +70,8 @@ public class DataStreamSerializer implements StreamSerializer {
     }
 
     private void readSection(DataInputStream dis, Resume resume) throws IOException {
-        while (dis.available() != 0) {
+        int sectionsNum = dis.readInt();
+        for (int i = sectionsNum; i > 0 ; i--) {
             SectionType sectionType = SectionType.valueOf(dis.readUTF());
             switch (sectionType) {
                 case PERSONAL:
@@ -78,7 +82,7 @@ public class DataStreamSerializer implements StreamSerializer {
                 case QUALIFICATIONS:
                     int listSize = dis.readInt();
                     List<String> list = new ArrayList<>(listSize);
-                    for (int i = 0; i < listSize; i++) {
+                    for (int j = 0; j < listSize; j++) {
                         list.add(dis.readUTF());
                     }
                     resume.addSection(sectionType, new ListSection(list));
@@ -87,15 +91,15 @@ public class DataStreamSerializer implements StreamSerializer {
                 case EDUCATION:
                     int listOrgSize = dis.readInt();
                     List<Organization> listOrg = new ArrayList<>(listOrgSize);
-                    for (int i = 0; i < listOrgSize; i++) {
+                    for (int j = 0; j < listOrgSize; j++) {
                         String homePageName = dis.readUTF();
                         String homePageURL = dis.readUTF();
                         Link homePage = new Link(homePageName, homePageURL.equals("") ? null : homePageURL);
                         int positionListSize = dis.readInt();
                         List<Organization.Position> positions = new ArrayList<>(positionListSize);
-                        for (int j = 0; j < positionListSize; j++) {
-                            LocalDate dateBegin = LocalDate.parse(dis.readUTF());
-                            LocalDate dateEnd = LocalDate.parse(dis.readUTF());
+                        for (int k = 0; k < positionListSize; k++) {
+                            LocalDate dateBegin = LocalDate.parse(dis.readUTF(), FORMATTER);
+                            LocalDate dateEnd = LocalDate.parse(dis.readUTF(), FORMATTER);
                             String title = dis.readUTF();
                             String description = dis.readUTF();
                             positions.add(new Organization.Position(
@@ -112,7 +116,8 @@ public class DataStreamSerializer implements StreamSerializer {
         }
     }
 
-    private <T> void writeWithException(Collection<T> collection, ConsumerWithIOException<? super T> action) throws IOException {
+    private <T> void writeWithException(Collection<T> collection, DataOutputStream dos, ConsumerWithIOException<? super T> action) throws IOException {
+        dos.writeInt(collection.size());
         for (T t : collection) {
             action.accept(t);
         }
