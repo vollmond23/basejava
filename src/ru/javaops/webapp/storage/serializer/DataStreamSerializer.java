@@ -56,10 +56,10 @@ public class DataStreamSerializer implements StreamSerializer {
         }
     }
 
-    private <T> void writeWithException(Collection<T> collection, DataOutputStream dos, ConsumerWithIOException<? super T> action) throws IOException {
+    private <T> void writeWithException(Collection<T> collection, DataOutputStream dos, ConsumerWithIOException<? super T> consumer) throws IOException {
         dos.writeInt(collection.size());
         for (T t : collection) {
-            action.accept(t);
+            consumer.accept(t);
         }
     }
 
@@ -67,10 +67,7 @@ public class DataStreamSerializer implements StreamSerializer {
     public Resume doRead(InputStream is) throws IOException {
         try (DataInputStream dis = new DataInputStream(is)) {
             Resume resume = new Resume(dis.readUTF(), dis.readUTF());
-            int size = dis.readInt();
-            for (int i = 0; i < size; i++) {
-                resume.addContact(ContactType.valueOf(dis.readUTF()), dis.readUTF());
-            }
+            readWithException(dis, () -> resume.addContact(ContactType.valueOf(dis.readUTF()), dis.readUTF()));
             readSection(dis, resume);
             return resume;
         }
@@ -87,24 +84,30 @@ public class DataStreamSerializer implements StreamSerializer {
                     break;
                 case ACHIEVEMENT:
                 case QUALIFICATIONS:
-                    resume.addSection(sectionType, new ListSection(readWithException(dis.readInt(), dis::readUTF)));
+                    List<String> listSection = new ArrayList<>();
+                    readWithException(dis, () -> listSection.add(dis.readUTF()));
+                    resume.addSection(sectionType, new ListSection(listSection));
                     break;
                 case EXPERIENCE:
                 case EDUCATION:
-                    List<Organization> listOrg = readWithException(dis.readInt(), () -> {
-                        List<String> homePageFields = readWithException(2, dis::readUTF);
-                        String url;
-                        Link homePage = new Link(homePageFields.get(0), (url = homePageFields.get(1)).equals("") ? null : url);
-                        List<Organization.Position> positions = readWithException(dis.readInt(), () -> {
-                            List<String> positionFields = readWithException(4, dis::readUTF);
-                            String description;
-                            return new Organization.Position(
-                                    LocalDate.parse(positionFields.get(0), FORMATTER),
-                                    LocalDate.parse(positionFields.get(1), FORMATTER),
-                                    positionFields.get(2),
-                                    (description = positionFields.get(3)).equals("") ? null : description);
+                    List<Organization> listOrg = new ArrayList<>();
+                    readWithException(dis, () -> {
+                        String name = dis.readUTF();
+                        String url = dis.readUTF();
+                        Link homePage = new Link(name, url.equals("") ? null : url);
+                        List<Organization.Position> positions = new ArrayList<>();
+                        readWithException(dis, () -> {
+                            LocalDate dateBegin = LocalDate.parse(dis.readUTF(), FORMATTER);
+                            LocalDate dateEnd = LocalDate.parse(dis.readUTF(), FORMATTER);
+                            String title = dis.readUTF();
+                            String description = dis.readUTF();
+                            positions.add(new Organization.Position(
+                                    dateBegin,
+                                    dateEnd,
+                                    title,
+                                    description.equals("") ? null : description));
                         });
-                        return new Organization(homePage, positions);
+                        listOrg.add(new Organization(homePage, positions));
                     });
                     resume.addSection(sectionType, new OrganizationSection(listOrg));
                     break;
@@ -112,11 +115,10 @@ public class DataStreamSerializer implements StreamSerializer {
         }
     }
 
-    private <T> List<T> readWithException(int count, SupplierWithIOException<T> action) throws IOException {
-        List<T> strings = new ArrayList<>();
+    private void readWithException(DataInputStream dis, SupplierWithIOException supplier) throws IOException {
+        int count = dis.readInt();
         for (int i = 0; i < count; i++) {
-            strings.add(action.get());
+            supplier.action();
         }
-        return strings;
     }
 }
