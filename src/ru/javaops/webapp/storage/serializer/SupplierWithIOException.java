@@ -4,5 +4,5 @@ import java.io.IOException;
 
 @FunctionalInterface
 public interface SupplierWithIOException {
-    void action() throws IOException;
+    void act() throws IOException;
 }

@@ -1,16 +1,14 @@
 package ru.javaops.webapp.storage.serializer;
 
 import ru.javaops.webapp.model.*;
+import ru.javaops.webapp.util.DateUtil;
 
 import java.io.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class DataStreamSerializer implements StreamSerializer {
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Override
     public void doWrite(Resume resume, OutputStream os) throws IOException {
@@ -26,34 +24,34 @@ public class DataStreamSerializer implements StreamSerializer {
     }
 
     private void writeSection(DataOutputStream dos, SectionType sectionType, Section section) throws IOException {
+        dos.writeUTF(sectionType.name());
         switch (sectionType) {
             case PERSONAL:
             case OBJECTIVE:
-                dos.writeUTF(sectionType.name());
                 dos.writeUTF(((TextSection) section).getContent());
                 break;
             case ACHIEVEMENT:
             case QUALIFICATIONS:
-                dos.writeUTF(sectionType.name());
                 writeWithException(((ListSection) section).getContent(), dos, dos::writeUTF);
                 break;
             case EXPERIENCE:
             case EDUCATION:
-                dos.writeUTF(sectionType.name());
                 writeWithException(((OrganizationSection) section).getContent(), dos, x -> {
                     dos.writeUTF(x.getHomePage().getName());
-                    String url = x.getHomePage().getUrl();
-                    dos.writeUTF(url != null ? url : "");
+                    dos.writeUTF(writeNullString(x.getHomePage().getUrl()));
                     writeWithException(x.getPositions(), dos, y -> {
-                        dos.writeUTF(y.getDateBegin().format(FORMATTER));
-                        dos.writeUTF(y.getDateEnd().format(FORMATTER));
+                        dos.writeUTF(DateUtil.writeLocalDate(y.getDateBegin()));
+                        dos.writeUTF(DateUtil.writeLocalDate(y.getDateEnd()));
                         dos.writeUTF(y.getTitle());
-                        String description = y.getDescription();
-                        dos.writeUTF(description != null ? description : "");
+                        dos.writeUTF(writeNullString(y.getDescription()));
                     });
                 });
                 break;
         }
+    }
+
+    private String writeNullString(String string) {
+        return string == null ? "" : string;
     }
 
     private <T> void writeWithException(Collection<T> collection, DataOutputStream dos, ConsumerWithIOException<? super T> consumer) throws IOException {
@@ -74,8 +72,7 @@ public class DataStreamSerializer implements StreamSerializer {
     }
 
     private void readSection(DataInputStream dis, Resume resume) throws IOException {
-        int sectionsNum = dis.readInt();
-        for (int i = sectionsNum; i > 0; i--) {
+        readWithException(dis, () -> {
             SectionType sectionType = SectionType.valueOf(dis.readUTF());
             switch (sectionType) {
                 case PERSONAL:
@@ -92,33 +89,29 @@ public class DataStreamSerializer implements StreamSerializer {
                 case EDUCATION:
                     List<Organization> listOrg = new ArrayList<>();
                     readWithException(dis, () -> {
-                        String name = dis.readUTF();
-                        String url = dis.readUTF();
-                        Link homePage = new Link(name, url.equals("") ? null : url);
+                        Link homePage = new Link(dis.readUTF(), readNullString(dis.readUTF()));
                         List<Organization.Position> positions = new ArrayList<>();
-                        readWithException(dis, () -> {
-                            LocalDate dateBegin = LocalDate.parse(dis.readUTF(), FORMATTER);
-                            LocalDate dateEnd = LocalDate.parse(dis.readUTF(), FORMATTER);
-                            String title = dis.readUTF();
-                            String description = dis.readUTF();
-                            positions.add(new Organization.Position(
-                                    dateBegin,
-                                    dateEnd,
-                                    title,
-                                    description.equals("") ? null : description));
-                        });
+                        readWithException(dis, () -> positions.add(new Organization.Position(
+                                DateUtil.readLocalDate(dis.readUTF()),
+                                DateUtil.readLocalDate(dis.readUTF()),
+                                dis.readUTF(),
+                                readNullString(dis.readUTF()))));
                         listOrg.add(new Organization(homePage, positions));
                     });
                     resume.addSection(sectionType, new OrganizationSection(listOrg));
                     break;
             }
-        }
+        });
+    }
+
+    private String readNullString(String string) {
+        return string.equals("") ? null : string;
     }
 
     private void readWithException(DataInputStream dis, SupplierWithIOException supplier) throws IOException {
         int count = dis.readInt();
         for (int i = 0; i < count; i++) {
-            supplier.action();
+            supplier.act();
         }
     }
 }
