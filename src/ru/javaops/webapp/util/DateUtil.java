@@ -12,11 +12,11 @@ public class DateUtil {
         return LocalDate.of(year, month, 1);
     }
 
-    public static LocalDate readLocalDate(String string) {
+    public static LocalDate parse(String string) {
         return LocalDate.parse(string, FORMATTER);
     }
 
-    public static String writeLocalDate(LocalDate localDate) {
+    public static String format(LocalDate localDate) {
         return localDate.format(FORMATTER);
     }
 }

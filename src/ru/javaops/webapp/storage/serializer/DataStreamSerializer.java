@@ -37,11 +37,12 @@ public class DataStreamSerializer implements StreamSerializer {
             case EXPERIENCE:
             case EDUCATION:
                 writeWithException(((OrganizationSection) section).getContent(), dos, x -> {
-                    dos.writeUTF(x.getHomePage().getName());
-                    dos.writeUTF(writeNullString(x.getHomePage().getUrl()));
+                    Link homePage = x.getHomePage();
+                    dos.writeUTF(homePage.getName());
+                    dos.writeUTF(writeNullString(homePage.getUrl()));
                     writeWithException(x.getPositions(), dos, y -> {
-                        dos.writeUTF(DateUtil.writeLocalDate(y.getDateBegin()));
-                        dos.writeUTF(DateUtil.writeLocalDate(y.getDateEnd()));
+                        dos.writeUTF(DateUtil.format(y.getDateBegin()));
+                        dos.writeUTF(DateUtil.format(y.getDateEnd()));
                         dos.writeUTF(y.getTitle());
                         dos.writeUTF(writeNullString(y.getDescription()));
                     });
@@ -92,8 +93,8 @@ public class DataStreamSerializer implements StreamSerializer {
                         Link homePage = new Link(dis.readUTF(), readNullString(dis.readUTF()));
                         List<Organization.Position> positions = new ArrayList<>();
                         readWithException(dis, () -> positions.add(new Organization.Position(
-                                DateUtil.readLocalDate(dis.readUTF()),
-                                DateUtil.readLocalDate(dis.readUTF()),
+                                DateUtil.parse(dis.readUTF()),
+                                DateUtil.parse(dis.readUTF()),
                                 dis.readUTF(),
                                 readNullString(dis.readUTF()))));
                         listOrg.add(new Organization(homePage, positions));
