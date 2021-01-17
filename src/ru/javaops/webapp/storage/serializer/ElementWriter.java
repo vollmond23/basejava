@@ -3,6 +3,6 @@ package ru.javaops.webapp.storage.serializer;
 import java.io.IOException;
 
 @FunctionalInterface
-public interface SupplierWithIOException {
-    void act() throws IOException;
+public interface ElementWriter<T> {
+    void write(T t) throws IOException;
 }

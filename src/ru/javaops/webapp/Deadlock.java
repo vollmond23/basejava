@@ -14,14 +14,14 @@ public class Deadlock {
         Thread thread = new Thread(() -> {
                    synchronized (lock1) {
                        String threadName = Thread.currentThread().getName();
-                       System.out.println(threadName + " locked " + lock1);
+                       System.out.println(threadName + " locked " + lock1.toString());
                        try {
                            Thread.sleep(100);
                        } catch (InterruptedException e) {
                            e.printStackTrace();
                        }
                        synchronized (lock2) {
-                           System.out.println(threadName + " locked " + lock2);
+                           System.out.println(threadName + " locked " + lock2.toString());
                        }
                    }
                 });
