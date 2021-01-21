@@ -14,14 +14,13 @@ public class MainStream {
         return Arrays.stream(values)
                 .distinct()
                 .sorted()
-                .reduce((a, b) -> a * 10 + b)
-                .orElse(0);
+                .reduce(0, (a, b) -> a * 10 + b);
     }
 
     static List<Integer> oddOrEven(List<Integer> integers) {
         int sum = integers.stream().mapToInt(Integer::valueOf).sum();
         return integers.stream()
-                .filter(x -> (sum % 2 == 0 && x % 2 != 0) || (sum % 2 != 0 && x % 2 == 0))
+                .filter(x -> sum % 2 != x % 2)
                 .collect(Collectors.toList());
     }
 
