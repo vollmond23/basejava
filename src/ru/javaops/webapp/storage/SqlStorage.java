@@ -1,43 +1,27 @@
 package ru.javaops.webapp.storage;
 
-import ru.javaops.webapp.exception.ExistStorageException;
+import ru.javaops.webapp.Config;
 import ru.javaops.webapp.exception.NotExistStorageException;
 import ru.javaops.webapp.model.Resume;
-import ru.javaops.webapp.sql.ConnectionFactory;
 import ru.javaops.webapp.util.SqlHelper;
 
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SqlStorage implements Storage {
-    public final ConnectionFactory connectionFactory;
-    private final SqlHelper sqlHelper;
-
-    public SqlStorage(String dbUrl, String dbUser, String dbPassword) {
-        connectionFactory = () -> DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-        sqlHelper = new SqlHelper(connectionFactory);
-    }
-
-    public SqlStorage(Properties props) {
-        this(props.getProperty("db.url"), props.getProperty("db.user"), props.getProperty("db.password"));
-    }
+    private final SqlHelper sqlHelper = Config.get().getSqlHelper();
 
     @Override
     public void clear() {
-        sqlHelper.executeCodeWith("DELETE FROM resume", PreparedStatement::executeUpdate);
+        sqlHelper.executeCodeWith("DELETE FROM resume", PreparedStatement::execute);
     }
 
     @Override
     public void save(Resume resume) {
-        checkIfExists(resume);
         sqlHelper.executeCodeWith("INSERT INTO resume (uuid, full_name) VALUES (?, ?)", ps -> {
             ps.setString(1, resume.getUuid());
             ps.setString(2, resume.getFullName());
@@ -47,22 +31,25 @@ public class SqlStorage implements Storage {
 
     @Override
     public void update(Resume resume) {
-        checkIfNotExists(resume);
         sqlHelper.executeCodeWith("UPDATE resume SET full_name=? WHERE uuid=?", ps -> {
+            String uuid = resume.getUuid();
             ps.setString(1, resume.getFullName());
-            ps.setString(2, resume.getUuid());
-            ps.execute();
+            ps.setString(2, uuid);
+            if (ps.executeUpdate() == 0) {
+                throw new NotExistStorageException(uuid);
+            }
         });
     }
 
     @Override
     public Resume get(String uuid) {
-        checkIfNotExists(new Resume(uuid, ""));
         AtomicReference<Resume> resume = new AtomicReference<>();
         sqlHelper.executeCodeWith("SELECT * FROM resume r WHERE r.uuid =?", ps -> {
             ps.setString(1, uuid);
             ResultSet rs = ps.executeQuery();
-            rs.next();
+            if (!rs.next()) {
+                throw new NotExistStorageException(uuid);
+            }
             resume.set(new Resume(uuid, rs.getString("full_name")));
         });
         return resume.get();
@@ -70,10 +57,12 @@ public class SqlStorage implements Storage {
 
     @Override
     public void delete(Resume resume) {
-        checkIfNotExists(resume);
         sqlHelper.executeCodeWith("DELETE FROM resume WHERE uuid=?", ps -> {
-            ps.setString(1, resume.getUuid());
-            ps.execute();
+            String uuid = resume.getUuid();
+            ps.setString(1, uuid);
+            if (ps.executeUpdate() == 0) {
+                throw new NotExistStorageException(uuid);
+            }
         });
     }
 
@@ -91,37 +80,12 @@ public class SqlStorage implements Storage {
     @Override
     public List<Resume> getAllSorted() {
         List<Resume> resumes = new ArrayList<>();
-        sqlHelper.executeCodeWith("SELECT * FROM resume", ps -> {
+        sqlHelper.executeCodeWith("SELECT * FROM resume ORDER BY full_name", ps -> {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 resumes.add(new Resume(rs.getString("uuid"), rs.getString("full_name")));
             }
         });
-        Collections.sort(resumes);
         return resumes;
-    }
-
-    private boolean isExists(String uuid) {
-        AtomicBoolean isExist = new AtomicBoolean(false);
-        sqlHelper.executeCodeWith("SELECT * FROM resume WHERE uuid = ?", ps -> {
-            ps.setString(1, uuid);
-            ResultSet rs = ps.executeQuery();
-            isExist.set(rs.next());
-        });
-        return isExist.get();
-    }
-
-    private void checkIfExists(Resume resume) {
-        String resumeUuid = resume.getUuid();
-        if (isExists(resumeUuid)) {
-            throw new ExistStorageException(resumeUuid);
-        }
-    }
-
-    private void checkIfNotExists(Resume resume) {
-        String resumeUuid = resume.getUuid();
-        if (!isExists(resumeUuid)) {
-            throw new NotExistStorageException(resumeUuid);
-        }
     }
 }

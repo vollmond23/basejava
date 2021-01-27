@@ -1,5 +1,7 @@
 package ru.javaops.webapp;
 
+import ru.javaops.webapp.util.SqlHelper;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,7 +31,7 @@ public class Config {
         return storageDir;
     }
 
-    public Properties getProps() {
-        return props;
+    public SqlHelper getSqlHelper() {
+        return new SqlHelper(props.getProperty("db.url"), props.getProperty("db.user"), props.getProperty("db.password"));
     }
 }
