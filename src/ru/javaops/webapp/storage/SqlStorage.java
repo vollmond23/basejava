@@ -1,91 +1,90 @@
 package ru.javaops.webapp.storage;
 
-import ru.javaops.webapp.Config;
 import ru.javaops.webapp.exception.NotExistStorageException;
 import ru.javaops.webapp.model.Resume;
-import ru.javaops.webapp.util.SqlHelper;
+import ru.javaops.webapp.sql.SqlHelper;
 
-import java.sql.PreparedStatement;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class SqlStorage implements Storage {
-    private final SqlHelper sqlHelper = Config.get().getSqlHelper();
+    private final SqlHelper sqlHelper;
+
+    public SqlStorage(String dbUrl, String dbUser, String dbPassword) {
+        sqlHelper = new SqlHelper(() -> DriverManager.getConnection(dbUrl, dbUser, dbPassword));
+    }
 
     @Override
     public void clear() {
-        sqlHelper.executeCodeWith("DELETE FROM resume", PreparedStatement::execute);
+        sqlHelper.execute("DELETE FROM resume");
     }
 
     @Override
     public void save(Resume resume) {
-        sqlHelper.executeCodeWith("INSERT INTO resume (uuid, full_name) VALUES (?, ?)", ps -> {
+        sqlHelper.<Void>execute("INSERT INTO resume (uuid, full_name) VALUES (?, ?)", ps -> {
             ps.setString(1, resume.getUuid());
             ps.setString(2, resume.getFullName());
             ps.execute();
+            return null;
         });
     }
 
     @Override
     public void update(Resume resume) {
-        sqlHelper.executeCodeWith("UPDATE resume SET full_name=? WHERE uuid=?", ps -> {
+        sqlHelper.execute("UPDATE resume SET full_name=? WHERE uuid=?", ps -> {
             String uuid = resume.getUuid();
             ps.setString(1, resume.getFullName());
             ps.setString(2, uuid);
             if (ps.executeUpdate() == 0) {
                 throw new NotExistStorageException(uuid);
             }
+            return null;
         });
     }
 
     @Override
     public Resume get(String uuid) {
-        AtomicReference<Resume> resume = new AtomicReference<>();
-        sqlHelper.executeCodeWith("SELECT * FROM resume r WHERE r.uuid =?", ps -> {
+        return sqlHelper.execute("SELECT * FROM resume r WHERE r.uuid =?", ps -> {
             ps.setString(1, uuid);
             ResultSet rs = ps.executeQuery();
             if (!rs.next()) {
                 throw new NotExistStorageException(uuid);
             }
-            resume.set(new Resume(uuid, rs.getString("full_name")));
+            return new Resume(uuid, rs.getString("full_name"));
         });
-        return resume.get();
     }
 
     @Override
     public void delete(Resume resume) {
-        sqlHelper.executeCodeWith("DELETE FROM resume WHERE uuid=?", ps -> {
+        sqlHelper.execute("DELETE FROM resume WHERE uuid=?", ps -> {
             String uuid = resume.getUuid();
             ps.setString(1, uuid);
             if (ps.executeUpdate() == 0) {
                 throw new NotExistStorageException(uuid);
             }
+            return null;
         });
     }
 
     @Override
     public int size() {
-        AtomicInteger size = new AtomicInteger();
-        sqlHelper.executeCodeWith("SELECT COUNT(*) AS size FROM resume", ps -> {
+        return sqlHelper.execute("SELECT COUNT(*) AS size FROM resume", ps -> {
             ResultSet rs = ps.executeQuery();
-            rs.next();
-            size.set(rs.getInt("size"));
+            return rs.next() ? rs.getInt(1) : 0;
         });
-        return size.get();
     }
 
     @Override
     public List<Resume> getAllSorted() {
-        List<Resume> resumes = new ArrayList<>();
-        sqlHelper.executeCodeWith("SELECT * FROM resume ORDER BY full_name", ps -> {
+        return sqlHelper.execute("SELECT * FROM resume ORDER BY full_name, uuid", ps -> {
             ResultSet rs = ps.executeQuery();
+            List<Resume> resumes = new ArrayList<>();
             while (rs.next()) {
                 resumes.add(new Resume(rs.getString("uuid"), rs.getString("full_name")));
             }
+            return resumes;
         });
-        return resumes;
     }
 }
