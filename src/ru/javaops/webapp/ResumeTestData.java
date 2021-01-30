@@ -14,13 +14,13 @@ public class ResumeTestData {
 
     public static Resume createResume(String uuid, String fullName) {
         Resume resume = new Resume(uuid, fullName);
-//        resume.addContact(ContactType.PHONE, "+7 (111) 111-1111");
-//        resume.addContact(ContactType.SKYPE, "some_skype");
-//        resume.addContact(ContactType.EMAIL, "some@mail.ru");
-//        resume.addContact(ContactType.LINKEDIN, "https://www.linkedin.com/in/some_guy");
-//        resume.addContact(ContactType.GITHUB, "https://github.com/some_guy");
-//        resume.addContact(ContactType.STACKOVERFLOW, "https://stackoverflow.com/users/some_guy");
-//        resume.addContact(ContactType.HOMEPAGE, "http://some_guy.ru/");
+        resume.addContact(ContactType.PHONE, "+7 (111) 111-1111");
+        resume.addContact(ContactType.SKYPE, "some_skype");
+        resume.addContact(ContactType.EMAIL, "some@mail.ru");
+        resume.addContact(ContactType.LINKEDIN, "https://www.linkedin.com/in/some_guy");
+        resume.addContact(ContactType.GITHUB, "https://github.com/some_guy");
+        resume.addContact(ContactType.STACKOVERFLOW, "https://stackoverflow.com/users/some_guy");
+        resume.addContact(ContactType.HOMEPAGE, "http://some_guy.ru/");
 //
 //        Section personal = new TextSection("Аналитический склад ума, сильная логика, креативность, инициативность. Пурист кода и архитектуры.");
 //        resume.addSection(SectionType.PERSONAL, personal);
