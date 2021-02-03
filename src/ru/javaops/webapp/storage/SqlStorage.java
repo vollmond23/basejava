@@ -1,6 +1,7 @@
 package ru.javaops.webapp.storage;
 
 import ru.javaops.webapp.exception.NotExistStorageException;
+import ru.javaops.webapp.exception.StorageException;
 import ru.javaops.webapp.model.ContactType;
 import ru.javaops.webapp.model.Resume;
 import ru.javaops.webapp.sql.SqlHelper;
@@ -67,7 +68,11 @@ public class SqlStorage implements Storage {
                     if (!rs.next()) {
                         throw new NotExistStorageException(uuid);
                     }
-                    return getResume(uuid, rs);
+                    Resume resume = getResumeFrom(rs);
+                    do {
+                        setContact(resume, rs);
+                    } while (rs.next());
+                    return resume;
                 });
     }
 
@@ -100,31 +105,32 @@ public class SqlStorage implements Storage {
                         " ORDER BY full_name, uuid;",
                 ps -> {
                     ResultSet rs = ps.executeQuery();
-                    List<Resume> resumes = new ArrayList<>();
-                    while (rs.next()) {
-                        resumes.add(getResume(rs.getString("uuid"), rs));
+                    if (!rs.next()) {
+                        throw new StorageException("Storage is empty");
                     }
+                    List<Resume> resumes = new ArrayList<>();
+                    Resume resume = getResumeFrom(rs);
+                    do {
+                        if (!resume.getUuid().equals(rs.getString("uuid"))) {
+                            resumes.add(resume);
+                            resume = getResumeFrom(rs);
+                        }
+                        setContact(resume, rs);
+                    } while (rs.next());
+                    resumes.add(resume);
                     return resumes;
                 });
     }
 
-    private Resume getResume(String uuid, ResultSet rs) throws SQLException {
-        Resume resume = new Resume(uuid, rs.getString("full_name"));
-        boolean isGotten = false;
-        rs.beforeFirst();
-        while (rs.next()) {
-            if (rs.getString("uuid").equals(uuid)) {
-                String value = rs.getString("value");
-                if (value == null) {
-                    break;
-                }
-                resume.addContact(ContactType.valueOf(rs.getString("type")), value);
-                isGotten = true;
-            } else if (isGotten) {
-                break;
-            }
+    private Resume getResumeFrom(ResultSet rs) throws SQLException {
+        return new Resume(rs.getString("uuid"), rs.getString("full_name"));
+    }
+
+    private void setContact (Resume resume, ResultSet rs) throws SQLException {
+        String value = rs.getString("value");
+        if (value != null) {
+            resume.addContact(ContactType.valueOf(rs.getString("type")), value);
         }
-        return resume;
     }
 
     private void insertContacts(Resume resume, Connection connection) throws SQLException {
