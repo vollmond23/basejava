@@ -1,13 +1,13 @@
 package ru.javaops.webapp.storage;
 
 import ru.javaops.webapp.exception.NotExistStorageException;
-import ru.javaops.webapp.exception.StorageException;
 import ru.javaops.webapp.model.ContactType;
 import ru.javaops.webapp.model.Resume;
 import ru.javaops.webapp.sql.SqlHelper;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -103,20 +103,17 @@ public class SqlStorage implements Storage {
                         " ORDER BY full_name, uuid;",
                 ps -> {
                     ResultSet rs = ps.executeQuery();
-                    if (!rs.next()) {
-                        throw new StorageException("Storage is empty");
-                    }
-                    List<Resume> resumes = new ArrayList<>();
-                    Resume resume = getResumeFrom(rs);
-                    do {
-                        if (!resume.getUuid().equals(rs.getString("uuid"))) {
-                            resumes.add(resume);
-                            resume = getResumeFrom(rs);
+                    Map<String, Resume> map = new LinkedHashMap<>();
+                    while (rs.next()) {
+                        String uuid = rs.getString("uuid");
+                        Resume resume = map.get(uuid);
+                        if (resume == null) {
+                            resume = new Resume(uuid, rs.getString("full_name"));
+                            map.put(uuid, resume);
                         }
                         setContact(resume, rs);
-                    } while (rs.next());
-                    resumes.add(resume);
-                    return resumes;
+                    }
+                    return new ArrayList<>(map.values());
                 });
     }
 
