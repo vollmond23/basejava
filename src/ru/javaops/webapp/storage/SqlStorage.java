@@ -1,7 +1,6 @@
 package ru.javaops.webapp.storage;
 
 import ru.javaops.webapp.exception.NotExistStorageException;
-import ru.javaops.webapp.exception.StorageException;
 import ru.javaops.webapp.model.*;
 import ru.javaops.webapp.sql.SqlHelper;
 
@@ -54,33 +53,24 @@ public class SqlStorage implements Storage {
 
     @Override
     public Resume get(String uuid) {
-        return sqlHelper.transactionalExecute(connection -> {
-            Resume resume;
-            try (PreparedStatement psResumeContacts = connection.prepareStatement("" +
-                    "   SELECT * FROM resume r " +
-                    "LEFT JOIN contact c " +
-                    "       ON r.uuid = c.resume_uuid " +
-                    "    WHERE r.uuid =?");
-            PreparedStatement psResumeSections = connection.prepareStatement("" +
-                    "   SELECT * FROM resume r " +
-                    "LEFT JOIN section ts " +
-                    "       ON r.uuid = ts.resume_uuid " +
-                    "    WHERE r.uuid =?")) {
-                psResumeContacts.setString(1, uuid);
-                psResumeSections.setString(1, uuid);
-                ResultSet rs = psResumeContacts.executeQuery();
-                if (!rs.next()) {
-                    throw new NotExistStorageException(uuid);
-                }
-                resume = getResumeFrom(rs);
-                do {
-                    setContact(resume, rs);
-                } while (rs.next());
-                rs = psResumeSections.executeQuery();
-                while (rs.next()) {
-                    setSection(resume, rs);
-                }
+        return sqlHelper.execute("" +
+                "   SELECT r.uuid as uuid, r.full_name as full_name, c.type as type, c.value as value, s.type as s_type, s.content as content FROM resume r " +
+                "LEFT JOIN contact c " +
+                "       ON r.uuid = c.resume_uuid " +
+                "LEFT JOIN section s " +
+                "       ON r.uuid = s.resume_uuid " +
+                "    WHERE r.uuid =?", ps -> {
+            Resume resume = null;
+            ps.setString(1, uuid);
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) {
+                throw new NotExistStorageException(uuid);
             }
+            resume = getResumeFrom(rs);
+            do {
+                setContact(resume, rs);
+                setSection(resume, rs);
+            } while (rs.next());
             return resume;
         });
     }
@@ -108,28 +98,32 @@ public class SqlStorage implements Storage {
 
     @Override
     public List<Resume> getAllSorted() {
-        ResultSet rsResumes = sqlHelper.execute("SELECT * FROM resume ORDER BY full_name, uuid;", PreparedStatement::executeQuery);
-        ResultSet rsContacts = sqlHelper.execute("SELECT * FROM contact;", PreparedStatement::executeQuery);
-        ResultSet rsSections = sqlHelper.execute("SELECT * FROM section;", PreparedStatement::executeQuery);
-        Map<String, Resume> map = new LinkedHashMap<>();
-        try {
-            while (rsResumes.next()) {
-                String uuid = rsResumes.getString("uuid");
-                map.put(uuid, new Resume(uuid, rsResumes.getString("full_name")));
+        return sqlHelper.transactionalExecute(connection -> {
+            try (PreparedStatement psResumes = connection.prepareStatement("" +
+                    "   SELECT * FROM resume r " +
+                    " ORDER BY full_name, uuid;");
+                 PreparedStatement psContacts = connection.prepareStatement("" +
+                         "SELECT * FROM contact;");
+                 PreparedStatement psSections = connection.prepareStatement("" +
+                         "SELECT resume_uuid, type as s_type, content FROM section;")) {
+
+                ResultSet rsResumes = psResumes.executeQuery();
+                ResultSet rsContacts = psContacts.executeQuery();
+                ResultSet rsSections = psSections.executeQuery();
+                Map<String, Resume> map = new LinkedHashMap<>();
+                while (rsResumes.next()) {
+                    String uuid = rsResumes.getString("uuid");
+                    map.put(uuid, new Resume(uuid, rsResumes.getString("full_name")));
+                }
+                while (rsContacts.next()) {
+                    setContact(map.get(rsContacts.getString("resume_uuid")), rsContacts);
+                }
+                while (rsSections.next()) {
+                    setSection(map.get(rsSections.getString("resume_uuid")), rsSections);
+                }
+                return new ArrayList<>(map.values());
             }
-            while (rsContacts.next()) {
-                setContact(map.get(rsContacts.getString("resume_uuid")), rsContacts);
-            }
-            while (rsSections.next()) {
-                setSection(map.get(rsSections.getString("resume_uuid")), rsSections);
-            }
-            rsResumes.close();
-            rsContacts.close();
-            rsSections.close();
-        } catch (SQLException e) {
-            throw new StorageException(e);
-        }
-        return new ArrayList<>(map.values());
+        });
     }
 
     private Resume getResumeFrom(ResultSet rs) throws SQLException {
@@ -144,7 +138,7 @@ public class SqlStorage implements Storage {
     }
 
     private void setSection(Resume resume, ResultSet rs) throws SQLException {
-        String type = rs.getString("type");
+        String type = rs.getString("s_type");
         if (type != null) {
             SectionType sectionType = SectionType.valueOf(type);
             String content = rs.getString("content");
@@ -196,20 +190,18 @@ public class SqlStorage implements Storage {
     }
 
     private String getSectionContent(SectionType key, Section section) {
-        StringBuilder str = new StringBuilder();
+        String content = null;
         switch (key) {
             case PERSONAL:
             case OBJECTIVE:
-                str.append(((TextSection) section).getContent());
+                content = ((TextSection) section).getContent();
                 break;
             case ACHIEVEMENT:
             case QUALIFICATIONS:
-                for (String string : ((ListSection) section).getContent()) {
-                    str.append(string).append('\n');
-                }
+                content = String.join("\n", ((ListSection) section).getContent());
                 break;
         }
-        return str.toString();
+        return content;
     }
 
     private void clearContactsSections(String uuid, Connection connection) throws SQLException {
