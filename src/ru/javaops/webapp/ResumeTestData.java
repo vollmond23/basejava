@@ -21,21 +21,21 @@ public class ResumeTestData {
         resume.addContact(ContactType.GITHUB, "https://github.com/some_guy");
         resume.addContact(ContactType.STACKOVERFLOW, "https://stackoverflow.com/users/some_guy");
         resume.addContact(ContactType.HOMEPAGE, "http://some_guy.ru/");
-//
-//        Section personal = new TextSection("Аналитический склад ума, сильная логика, креативность, инициативность. Пурист кода и архитектуры.");
-//        resume.addSection(SectionType.PERSONAL, personal);
-//        Section objective = new TextSection("Ведущий стажировок и корпоративного обучения по Java Web и Enterprise технологиям");
-//        resume.addSection(SectionType.OBJECTIVE, objective);
-//
-//        List<String> achievement = new ArrayList<>();
-//        achievement.add("С 2013 года: разработка проектов \"Разработка Web приложения\",\"Java Enterprise\", \"Многомодульный maven. Многопоточность. XML (JAXB/StAX). Веб сервисы (JAX-RS/SOAP). Удаленное взаимодействие (JMS/AKKA)\". Организация онлайн стажировок и ведение проектов. Более 1000 выпускников.");
-//        achievement.add("Реализация двухфакторной аутентификации для онлайн платформы управления проектами Wrike. Интеграция с Twilio, DuoSecurity, Google Authenticator, Jira, Zendesk.");
-//        resume.addSection(SectionType.ACHIEVEMENT, new ListSection(achievement));
-//
-//        List<String> qualifications = new ArrayList<>();
-//        qualifications.add("JEE AS: GlassFish (v2.1, v3), OC4J, JBoss, Tomcat, Jetty, WebLogic, WSO2");
-//        qualifications.add("Родной русский, английский \"upper intermediate\"");
-//        resume.addSection(SectionType.QUALIFICATIONS, new ListSection(qualifications));
+
+        Section personal = new TextSection("Аналитический склад ума, сильная логика, креативность, инициативность. Пурист кода и архитектуры.");
+        resume.addSection(SectionType.PERSONAL, personal);
+        Section objective = new TextSection("Ведущий стажировок и корпоративного обучения по Java Web и Enterprise технологиям");
+        resume.addSection(SectionType.OBJECTIVE, objective);
+
+        List<String> achievement = new ArrayList<>();
+        achievement.add("С 2013 года: разработка проектов \"Разработка Web приложения\",\"Java Enterprise\", \"Многомодульный maven. Многопоточность. XML (JAXB/StAX). Веб сервисы (JAX-RS/SOAP). Удаленное взаимодействие (JMS/AKKA)\". Организация онлайн стажировок и ведение проектов. Более 1000 выпускников.");
+        achievement.add("Реализация двухфакторной аутентификации для онлайн платформы управления проектами Wrike. Интеграция с Twilio, DuoSecurity, Google Authenticator, Jira, Zendesk.");
+        resume.addSection(SectionType.ACHIEVEMENT, new ListSection(achievement));
+
+        List<String> qualifications = new ArrayList<>();
+        qualifications.add("JEE AS: GlassFish (v2.1, v3), OC4J, JBoss, Tomcat, Jetty, WebLogic, WSO2");
+        qualifications.add("Родной русский, английский \"upper intermediate\"");
+        resume.addSection(SectionType.QUALIFICATIONS, new ListSection(qualifications));
 //
 //        List<Organization> jobs = new ArrayList<>();
 //        jobs.add(new Organization("Java Online Projects", "http://javaops.ru/", DateUtil.of(2013, Month.OCTOBER), DateUtil.NOW, "Автор проекта.", "Создание, организация и проведение Java онлайн проектов и стажировок."));
