@@ -3,7 +3,6 @@ package ru.javaops.webapp.storage;
 import org.junit.Before;
 import org.junit.Test;
 import ru.javaops.webapp.Config;
-import ru.javaops.webapp.ResumeTestData;
 import ru.javaops.webapp.exception.ExistStorageException;
 import ru.javaops.webapp.exception.NotExistStorageException;
 import ru.javaops.webapp.model.Resume;
@@ -11,31 +10,14 @@ import ru.javaops.webapp.model.Resume;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static ru.javaops.webapp.TestData.*;
 
 public abstract class AbstractStorageTest {
     protected static final File STORAGE_DIR = Config.get().getStorageDir();
 
     protected Storage storage;
-
-    private static final String UUID_1 = UUID.randomUUID().toString();
-    private static final String UUID_2 = UUID.randomUUID().toString();
-    private static final String UUID_3 = UUID.randomUUID().toString();
-    private static final String UUID_4 = UUID.randomUUID().toString();
-
-    private static final Resume R1;
-    private static final Resume R2;
-    private static final Resume R3;
-    private static final Resume R4;
-
-    static {
-        R1 = new Resume(UUID_1, "FULL_NAME_1");
-        R2 = ResumeTestData.createResume(UUID_2, "FULL_NAME_2");
-        R3 = ResumeTestData.createResume(UUID_3, "FULL_NAME_3");
-        R4 = ResumeTestData.createResume(UUID_4, "FULL_NAME_4");
-    }
 
     protected AbstractStorageTest(Storage storage) {
         this.storage = storage;
