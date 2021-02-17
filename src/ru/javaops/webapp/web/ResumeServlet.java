@@ -22,18 +22,8 @@ public class ResumeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html; charset=UTF-8");
-        Writer writer = response.getWriter();
-        writeHeader(writer);
-        String uuid = request.getParameter("uuid");
-        if (uuid == null) {
-            writeTableResumes(writer);
-        } else {
-            writeResumeInfo(uuid, writer);
-        }
-        writeFooter(writer);
+        request.setAttribute("resumes", RESUME_STORAGE.getAllSorted());
+        request.getRequestDispatcher("/WEB-INF/jsp/list.jsp").forward(request, response);
     }
 
     private void writeTableResumes(Writer writer) throws IOException {
