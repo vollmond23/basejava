@@ -110,4 +110,8 @@ public class Resume implements Comparable<Resume>, Serializable {
             Objects.requireNonNull(args[i], "Parameter #" + i + " must not be null");
         }
     }
+
+    public String getContact(ContactType type) {
+        return getContacts().get(type);
+    }
 }

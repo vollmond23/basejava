@@ -1,6 +1,7 @@
 package ru.javaops.webapp.web;
 
 import ru.javaops.webapp.Config;
+import ru.javaops.webapp.model.ContactType;
 import ru.javaops.webapp.model.Resume;
 import ru.javaops.webapp.storage.Storage;
 
@@ -39,12 +40,12 @@ public class ResumeServlet extends HttpServlet {
         writer.write("" +
                 "<h2>List of all resumes in DB</h2>" +
                 "<table>" +
-                "<thead><tr><th>UUID</td><th>Full Name</th></tr></thead>" +
+                "<thead><tr><th>Full Name</th><th>Email2</th></tr></thead>" +
                 "<tbody>");
         for (Resume resume : RESUME_STORAGE.getAllSorted()) {
             writer.write("<tr>");
-            writer.write("<td><a href=\"?uuid=" + resume.getUuid() + "\">" + resume.getUuid() + "</td>");
-            writer.write("<td>" + resume.getFullName() + "</td>");
+            writer.write("<td><a href=\"?uuid=" + resume.getUuid() + "\">" + resume.getFullName() + "</td>");
+            writer.write("<td>" + resume.getContact(ContactType.EMAIL) + "</td>");
             writer.write("</tr>");
         }
         writer.write("</tbody></table>");
