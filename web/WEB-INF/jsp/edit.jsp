@@ -1,5 +1,6 @@
 <%@ page import="ru.javaops.webapp.model.ContactType" %>
 <%@ page import="ru.javaops.webapp.model.SectionType" %>
+<%@ page import="ru.javaops.webapp.util.DateUtil" %>
 <%@ page import="java.util.List" %>
 <%@ page import="ru.javaops.webapp.model.ListSection" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
@@ -59,8 +60,66 @@
                     <jsp:useBean id="orgSection" class="ru.javaops.webapp.model.OrganizationSection"/>
                     <h3>${sectionType.title}</h3>
                     <div id="${sectionType.name()}">
-                        <div id="${sectionType.name()}_newOrgs">
-                            <a href="#" onclick="addOrganization('${sectionType.name()}')">Добавить организацию</a>
+                        <div class="org_section">
+                            <div id="${sectionType.name()}_newOrg">
+                                <h4>Добавить организацию:</h4>
+                                <dl>
+                                    <dt>Название:</dt>
+                                    <dd>
+                                        <input type="text" name="newOrg_${sectionType.name()}_orgName" value="">
+                                    </dd>
+                                </dl>
+                                <dl>
+                                    <dt>URL:</dt>
+                                    <dd><input type="text" name="newOrg_${sectionType.name()}_orgUrl" value=""></dd>
+                                </dl>
+                                <strong>Периоды
+                                    <c:choose>
+                                        <c:when test="${sectionType.name() == SectionType.EXPERIENCE}">
+                                            работы:
+                                        </c:when>
+                                        <c:otherwise>
+                                            обучения:
+                                        </c:otherwise>
+                                    </c:choose>
+                                </strong>
+                                <div class="positions">
+                                    <dl>
+                                        <dt>Дата начала:</dt>
+                                        <dd><input type="text" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"
+                                                   name="newOrg_${sectionType.name()}_dateBegin" value=""><br/>
+                                            введите данные в формате дд/мм/гггг
+                                        </dd>
+                                    </dl>
+                                    <dl>
+                                        <dt>Дата окончания:
+                                        </dt>
+                                        <dd><input type="text" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"
+                                                   name="newOrg_${sectionType.name()}_dateEnd" value=""><br/>
+                                            введите данные в формате дд/мм/гггг либо оставьте пустым, <br/>
+                                            если всё ещё находитесь на данной позиции
+                                        </dd>
+                                    </dl>
+                                    <dl>
+                                        <c:choose>
+                                            <c:when test="${sectionType.name() == SectionType.EXPERIENCE}">
+                                                <dt>Должность:</dt>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <dt>Специальность:</dt>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        <dd><input type="text" name="newOrg_${sectionType.name()}_title" value=""></dd>
+                                    </dl>
+                                    <c:if test="${sectionType == SectionType.EXPERIENCE}">
+                                        <dl>
+                                            <dt>Обязанности:</dt>
+                                            <dd><textarea name="newOrg_${sectionType.name()}_description"></textarea>
+                                            </dd>
+                                        </dl>
+                                    </c:if>
+                                </div>
+                            </div>
                         </div>
                         <c:forEach var="organization" items="${orgSection.content}">
                             <div class="org_section">
@@ -77,20 +136,63 @@
                                                name="${organization.homePage.name}_${sectionType.name()}_orgUrl"
                                                value="${organization.homePage.url}"></dd>
                                 </dl>
-                                <strong>Периоды:</strong>
+                                <strong>Периоды
+                                    <c:choose>
+                                        <c:when test="${sectionType.name() == SectionType.EXPERIENCE}">
+                                            работы:
+                                        </c:when>
+                                        <c:otherwise>
+                                            обучения:
+                                        </c:otherwise>
+                                    </c:choose>
+                                </strong>
                                 <div class="positions">
+                                    <h4>Добавить период:</h4>
+                                    <dl>
+                                        <dt>Дата начала:</dt>
+                                        <dd><input type="text" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"
+                                                   name="${organization.homePage.name}_newPosition_${sectionType.name()}_dateBegin"
+                                                   value=""><br/>
+                                            введите данные в формате дд/мм/гггг
+                                        </dd>
+                                    </dl>
+                                    <dl>
+                                        <dt>Дата окончания:</dt>
+                                        <dd><input type="text" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"
+                                                   name="${organization.homePage.name}_newPosition_${sectionType.name()}_dateEnd"
+                                                   value=""><br/>
+                                            введите данные в формате дд/мм/гггг либо оставьте пустым, <br/>
+                                            если всё ещё находитесь на данной позиции
+                                        </dd>
+                                    </dl>
+                                    <dl>
+                                        <dt>Должность:</dt>
+                                        <dd><input type="text"
+                                                   name="${organization.homePage.name}_newPosition_${sectionType.name()}_title"
+                                                   value="">
+                                        </dd>
+                                    </dl>
+                                    <c:if test="${sectionType == SectionType.EXPERIENCE}">
+                                        <dl>
+                                            <dt>Обязанности:</dt>
+                                            <dd><textarea
+                                                    name="${organization.homePage.name}_newPosition_${sectionType.name()}_description"></textarea>
+                                            </dd>
+                                        </dl>
+                                    </c:if>
                                     <c:forEach var="position" items="${organization.positions}">
                                         <dl>
                                             <dt>Дата начала:</dt>
-                                            <dd><input type="date"
+                                            <dd><input type="text" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"
                                                        name="${organization.homePage.name}_${fn:replace(position.title, '\"', '')}_${sectionType.name()}_dateBegin"
-                                                       value="${position.dateBegin}"></dd>
+                                                       value="${DateUtil.format(position.dateBegin)}"></dd>
                                         </dl>
                                         <dl>
                                             <dt>Дата окончания:</dt>
-                                            <dd><input type="date"
+                                            <dd><input type="text" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"
                                                        name="${organization.homePage.name}_${fn:replace(position.title, '\"', '')}_${sectionType.name()}_dateEnd"
-                                                       value="${position.dateEnd}"></dd>
+                                                       value="${(position.dateEnd == DateUtil.NOW) ? null : DateUtil.format(position.dateEnd)}">
+                                            </dd>
                                         </dl>
                                         <dl>
                                             <dt>Должность:</dt>
@@ -99,7 +201,7 @@
                                                        value="${fn:escapeXml(position.title)}">
                                             </dd>
                                         </dl>
-                                        <c:if test="${position.description != null}">
+                                        <c:if test="${sectionType == SectionType.EXPERIENCE}">
                                             <dl>
                                                 <dt>Обязанности:</dt>
                                                 <dd><textarea
@@ -125,22 +227,6 @@
             input.name = sectionTypeName;
             document.getElementById(sectionTypeName).appendChild(input);
             document.getElementById(sectionTypeName).appendChild(document.createElement('br'));
-        }
-
-        function addOrganization(sectionTypeName) {
-            var div = document.createElement('div');
-            div.id = sectionTypeName + '_newOrganization';
-            div.className = 'org_section';
-            div.innerHTML = '' +
-                '<dl><dt>Название:</dt><dd>' +
-                '<input type="text" name="newOrganization_' + sectionTypeName + '_orgName" value=""></dd></dl>' +
-                '<dl><dt>URL:</dt><dd><input type="text" name="newOrganizationName_' + sectionTypeName + '_orgUrl" value=""></dd></dl>' +
-                '<strong>Периоды:</strong>' +
-                '<div class="positions">' +
-                '<dl><dt>Дата начала:</dt><dd><input type="date" name="newOrganizationName_newPosition_' + sectionTypeName + '_dateBegin" value=""></dd></dl>' +
-                '<dl><dt>Дата окончания:</dt><dd><input type="date" name="newOrganizationName_newPosition_' + sectionTypeName + '_dateEnd" value=""></dd></dl>' +
-                '<dl><dt>Должность:</dt><dd><input type="text" name="newOrganizationName_newPosition_title" value=""></dd></dl>';
-            document.getElementById(sectionTypeName + '_newOrgs').appendChild(div);
         }
     </script>
 </section>

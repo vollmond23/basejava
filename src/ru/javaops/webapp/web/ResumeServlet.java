@@ -10,7 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -66,29 +68,34 @@ public class ResumeServlet extends HttpServlet {
                     break;
                 case EXPERIENCE:
                 case EDUCATION:
-                    /*
-                      inputs name org:     ${organization.homePage.name}_${sectionType.name()}_{orgName,orgUrl}
-
-                             positions:    ${organization.homePage.name}_${position.title}_${sectionType.name()}
-                                           _{dateBegin, dateEnd, title, description}
-                     */
                     List<Organization> organizations = new ArrayList<>();
                     List<String> inputsByType = filterInputsByType(request, type);
                     for (String orgName : getOrgsNames(inputsByType)) {
+                        String name = request.getParameter(orgName + "_" + type.name() + "_orgName");
+                        if (name.trim().equals("")) {
+                            continue;
+                        }
                         String url = request.getParameter(orgName + "_" + type.name() + "_orgUrl");
                         Link homePage = new Link(
-                                request.getParameter(orgName + "_" + type.name() + "_orgName"),
-                                (url.equals("") ? null : url));
+                                name,
+                                (url.trim().equals("") ? null : url));
                         List<String> inputsByOrg = getInputsByOrg(inputsByType, orgName);
                         List<Organization.Position> positions = new ArrayList<>();
                         for (String positionTitle : getPositionTitles(inputsByOrg)) {
+                            String title = request.getParameter(orgName + "_" + positionTitle + "_" + type.name() + "_title");
+                            if (title.trim().equals("")) {
+                                continue;
+                            }
+                            String dateBegin = request.getParameter(orgName + "_" + positionTitle + "_"
+                                    + type.name() + "_dateBegin");
+                            String dateEnd = request.getParameter(orgName + "_" + positionTitle + "_"
+                                    + type.name() + "_dateEnd");
+                            String description = request.getParameter(orgName + "_" + positionTitle + "_" + type.name() + "_description");
                             positions.add(new Organization.Position(
-                                    DateUtil.parseHtml(request.getParameter(orgName + "_" + positionTitle + "_"
-                                            + type.name() + "_dateBegin")),
-                                    DateUtil.parseHtml(request.getParameter(orgName + "_" + positionTitle + "_"
-                                            + type.name() + "_dateEnd")),
-                                    request.getParameter(orgName + "_" + positionTitle + "_" + type.name() + "_title"),
-                                    request.getParameter(orgName + "_" + positionTitle + "_" + type.name() + "_description")));
+                                    DateUtil.parse(dateBegin),
+                                    dateEnd.equals("") ? DateUtil.NOW : DateUtil.parse(dateEnd),
+                                    title,
+                                    description));
                         }
                         organizations.add(new Organization(homePage, positions));
                     }
@@ -123,6 +130,7 @@ public class ResumeServlet extends HttpServlet {
     private List<String> getOrgsNames(List<String> inputsByType) {
         return inputsByType.stream()
                 .filter(s -> s.contains("orgName"))
+                .filter(s -> !s.startsWith("newOrg"))
                 .map(s -> s.substring(0, s.indexOf("_")))
                 .collect(Collectors.toList());
     }
