@@ -16,7 +16,9 @@
 <section>
     <h2>${resume.fullName}&nbsp;<a href="?uuid=${resume.uuid}&action=edit"><img width="20" src="img/edit-icon.png"></a>
     </h2>
-    <h3>Контакты:</h3>
+    <c:if test="${resume.contacts.size() != 0}">
+        <h3>Контакты:</h3>
+    </c:if>
     <p>
         <c:forEach var="contactEntry" items="${resume.contacts}">
             <jsp:useBean id="contactEntry"
@@ -25,7 +27,9 @@
         </c:forEach>
     </p>
     <c:forEach var="sectionType" items="<%=SectionType.values()%>">
-        <h3>${sectionType.title}</h3>
+        <c:if test="${resume.getSection(sectionType) != null}">
+            <h3>${sectionType.title}</h3>
+        </c:if>
         <c:choose>
             <c:when test="${sectionType == SectionType.PERSONAL || sectionType == SectionType.OBJECTIVE}">
                 <c:set var="textSection" value="${resume.getSection(sectionType)}"/>
