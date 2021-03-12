@@ -11,7 +11,8 @@
 <jsp:include page="fragments/header.jsp"/>
 <section>
     <h2>List of all resumes in DB</h2>
-    <table>
+    <a href="resume?action=add">Добавить резюме</a><br/>
+    <table id="list_table">
         <thead>
         <tr>
             <th>Имя</th>

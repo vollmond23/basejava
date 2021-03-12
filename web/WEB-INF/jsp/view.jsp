@@ -1,6 +1,8 @@
 <%@ page import="ru.javaops.webapp.storage.ListStorage" %>
 <%@ page import="ru.javaops.webapp.model.*" %>
 <%@ page import="ru.javaops.webapp.util.DateUtil" %>
+<%@ page import="javax.print.attribute.standard.OrientationRequested" %>
+<%@ page import="ru.javaops.webapp.util.HtmlUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -18,78 +20,78 @@
     </h2>
     <c:if test="${resume.contacts.size() != 0}">
         <h3>Контакты:</h3>
+        <p>
+            <c:forEach var="contactEntry" items="${resume.contacts}">
+                <jsp:useBean id="contactEntry"
+                             type="java.util.Map.Entry<ru.javaops.webapp.model.ContactType, java.lang.String>"/>
+                <%=contactEntry.getKey().toHtml(contactEntry.getValue())%><br/>
+            </c:forEach>
+        </p>
     </c:if>
-    <p>
-        <c:forEach var="contactEntry" items="${resume.contacts}">
-            <jsp:useBean id="contactEntry"
-                         type="java.util.Map.Entry<ru.javaops.webapp.model.ContactType, java.lang.String>"/>
-            <%=contactEntry.getKey().toHtml(contactEntry.getValue())%><br/>
-        </c:forEach>
-    </p>
-    <c:forEach var="sectionType" items="<%=SectionType.values()%>">
-        <c:if test="${resume.getSection(sectionType) != null}">
-            <h3>${sectionType.title}</h3>
-        </c:if>
-        <c:choose>
-            <c:when test="${sectionType == SectionType.PERSONAL || sectionType == SectionType.OBJECTIVE}">
-                <c:set var="textSection" value="${resume.getSection(sectionType)}"/>
-                <jsp:useBean id="textSection" class="ru.javaops.webapp.model.TextSection"/>
-                <p>${textSection.content}</p>
-            </c:when>
-            <c:when test="${sectionType == SectionType.ACHIEVEMENT || sectionType == SectionType.QUALIFICATIONS}">
-                <c:set var="listSection" value="${resume.getSection(sectionType)}"/>
-                <jsp:useBean id="listSection" class="ru.javaops.webapp.model.ListSection"/>
-                <ul>
-                    <c:forEach var="str" items="<%=listSection.getContent()%>">
-                        <li>${fn:escapeXml(str)}</li>
-                    </c:forEach>
-                </ul>
-            </c:when>
-            <c:when test="${sectionType == SectionType.EDUCATION || sectionType == SectionType.EXPERIENCE}">
-                <ul>
-                    <c:set var="orgSection" value="${resume.getSection(sectionType)}"/>
-                    <jsp:useBean id="orgSection" class="ru.javaops.webapp.model.OrganizationSection"/>
-                    <c:forEach var="organization" items="${orgSection.content}">
-                        <strong>
-                            <li>${fn:escapeXml(organization.homePage.name)}
-                                <c:if test="${organization.homePage.url != null}">
-                                    &nbsp;(<a href="${organization.homePage.url}">${organization.homePage.url}</a>)
-                                </c:if>
-                            </li>
-                        </strong>
-                        <p>Периоды
-                            <c:choose>
-                            <c:when test="${sectionType == SectionType.EDUCATION}">
-                            обучения:
-                            </c:when>
-                            <c:otherwise>
-                            работы:
-                            </c:otherwise>
-                            </c:choose>
-                        <div class="positions">
-                            <c:forEach var="position" items="${organization.positions}">
-                                ${DateUtil.format(position.dateBegin)}&nbsp;-
-                                <c:choose>
-                                    <c:when test="${position.dateEnd == DateUtil.NOW}">
-                                        настоящее время
-                                    </c:when>
-                                    <c:otherwise>
-                                        ${DateUtil.format(position.dateEnd)}
-                                    </c:otherwise>
-                                </c:choose>
-                                :&nbsp;<strong>${fn:escapeXml(position.title)}</strong>
-                                <br/>
-                                <c:if test="${position.description != null}">
-                                    Обязанности: ${fn:escapeXml(position.description)}<br/>
-                                </c:if>
+    <hr/>
+    <table cellpadding="2">
+        <c:forEach var="sectionEntry" items="${resume.sections}">
+            <jsp:useBean id="sectionEntry"
+                         type="java.util.Map.Entry<ru.javaops.webapp.model.SectionType, ru.javaops.webapp.model.Section>"/>
+            <c:set var="type" value="${sectionEntry.key}"/>
+            <c:set var="section" value="${sectionEntry.value}"/>
+            <jsp:useBean id="section" type="ru.javaops.webapp.model.Section"/>
+            <tr>
+                <td><h3><a name="type.name">${type.title}</a></h3></td>
+                <c:if test="${type=='OBJECTIVE'}">
+                    <td><h3><%=((TextSection) section).getContent()%>
+                    </h3></td>
+                </c:if>
+            </tr>
+            <c:if test="${type!='OBJECTIVE'}">
+                <c:choose>
+                    <c:when test="${type=='PERSONAL'}">
+                        <tr>
+                            <td>
+                                <%=((TextSection) section).getContent()%>
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:when test="${type=='ACHIEVEMENT' || type=='QUALIFICATIONS'}">
+                        <tr>
+                            <td>
+                                <ul>
+                                    <c:forEach var="item" items="<%=((ListSection) section).getContent()%>">
+                                        <li>${item}</li>
+                                    </c:forEach>
+                                </ul>
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:when test="${type=='EXPERIENCE' || type=='EDUCATION'}">
+                        <c:forEach var="org" items="<%=((OrganizationSection) section).getContent()%>">
+                            <tr>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${empty org.homePage.url}">
+                                            <h3>${org.homePage.name}</h3>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <h3><a href="${org.homePage.url}">${org.homePage.name}</a></h3>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                            </tr>
+                            <c:forEach var="position" items="${org.positions}">
+                                <jsp:useBean id="position" type="ru.javaops.webapp.model.Organization.Position"/>
+                                <tr>
+                                    <td><%=HtmlUtil.formatDates(position)%>
+                                    </td>
+                                    <td><strong>${position.title}</strong><br/>${position.description}</td>
+                                </tr>
                             </c:forEach>
-                        </div>
-                    </p>
-                    </c:forEach>
-                </ul>
-            </c:when>
-        </c:choose>
-    </c:forEach>
+                        </c:forEach>
+                    </c:when>
+                </c:choose>
+            </c:if>
+        </c:forEach>
+    </table>
+    <button onclick="window.history.back()">OK</button>
 </section>
 <jsp:include page="fragments/footer.jsp"/>
 </body>

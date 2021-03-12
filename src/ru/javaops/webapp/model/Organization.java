@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,12 +18,19 @@ import java.util.Objects;
 public class Organization implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    public static final Organization EMPTY = new Organization("", "", Position.EMPTY);
+
     private Link homePage;
     private List<Position> positions = new ArrayList<>();
+
+    public Organization(String name, String url, Position position) {
+        this(new Link(name, url), Arrays.asList(position));
+    }
 
     @XmlAccessorType(XmlAccessType.FIELD)
 
     public static class Position implements Serializable {
+        public static final Position EMPTY = new Position();
         private static final long serialVersionUID = 1L;
         @XmlJavaTypeAdapter(value = LocalDateAdapter.class)
         private LocalDate dateBegin;
